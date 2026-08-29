@@ -99,6 +99,7 @@ pgo_profiles_present() {
         [ -n "$name" ] || return 1
         [ -f "$SRC/chrome/build/pgo_profiles/$name" ] || return 1
     done
+    [ -n "$(find "$SRC/v8/tools/builtins-pgo/profiles" -name "*.profile" 2>/dev/null | head -1)" ] || return 1
     return 0
 }
 
@@ -150,6 +151,7 @@ solutions = [
     "custom_deps": {},
     "custom_vars": {
       "checkout_configuration": "small",
+      "checkout_pgo_profiles": True,
     },
   },
 ];
@@ -171,17 +173,8 @@ EOF
     [ -x "$clang" ] || die "gclient finished but chromium's own clang is not at $clang"
     say "chromium's own clang is in place: $("$clang" --version | head -1)"
 
-    local target
-    for target in $PGO_TARGETS; do
-        say "fetching the pgo profile the tree names for $target"
-        ( cd "$SRC" && env -u VPYTHON_BYPASS -u VIRTUAL_ENV -u PYTHONPATH -u PYTHONHOME \
-            DEPOT_TOOLS_UPDATE=0 \
-            PATH="$dt:$(path_without_virtualenv)" \
-            "$dt/vpython3" tools/update_pgo_profiles.py --target="$target" update \
-                --gs-url-base=chromium-optimization-profiles/pgo_profiles )
-    done
-    pgo_profiles_present || die "the pgo profiles the tree names are still not on disk"
-    say "pgo profiles in place for: $PGO_TARGETS"
+    pgo_profiles_present || die "the hooks did not leave the pgo profiles this build needs on disk"
+    say "pgo profiles in place: chrome ($PGO_TARGETS) and v8 builtins"
 
     printf '%s' "$head" > "$marker"
     report deps "$started"
