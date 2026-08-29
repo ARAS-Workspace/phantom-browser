@@ -88,6 +88,18 @@ stage_source() {
     report source "$started"
 }
 
+PGO_TARGETS="mac mac-arm"
+
+pgo_profiles_present() {
+    local target name
+    for target in $PGO_TARGETS; do
+        name="$(cat "$SRC/chrome/build/$target.pgo.txt" 2>/dev/null || true)"
+        [ -n "$name" ] || return 1
+        [ -f "$SRC/chrome/build/pgo_profiles/$name" ] || return 1
+    done
+    return 0
+}
+
 stage_deps() {
     local started=$SECONDS
     local staging="$TREE/.staging"
@@ -98,7 +110,7 @@ stage_deps() {
     [ -d "$SRC/.git" ] || die "the source stage has not run, there is no tree at $SRC"
     head="$(git -C "$SRC" rev-parse HEAD)"
 
-    if [ -f "$marker" ] && [ "$(cat "$marker")" = "$head" ]; then
+    if [ -f "$marker" ] && [ "$(cat "$marker")" = "$head" ] && pgo_profiles_present; then
         say "deps already synced for $head, nothing to do"
         return 0
     fi
@@ -152,6 +164,18 @@ EOF
     local clang="$SRC/third_party/llvm-build/Release+Asserts/bin/clang"
     [ -x "$clang" ] || die "gclient finished but chromium's own clang is not at $clang"
     say "chromium's own clang is in place: $("$clang" --version | head -1)"
+
+    local target
+    for target in $PGO_TARGETS; do
+        say "fetching the pgo profile the tree names for $target"
+        ( cd "$SRC" && env -u VPYTHON_BYPASS -u VIRTUAL_ENV -u PYTHONPATH -u PYTHONHOME \
+            DEPOT_TOOLS_UPDATE=0 \
+            PATH="$dt:$(path_without_virtualenv)" \
+            "$dt/vpython3" tools/update_pgo_profiles.py --target="$target" update \
+                --gs-url-base=chromium-optimization-profiles/pgo_profiles )
+    done
+    pgo_profiles_present || die "the pgo profiles the tree names are still not on disk"
+    say "pgo profiles in place for: $PGO_TARGETS"
 
     printf '%s' "$head" > "$marker"
     report deps "$started"
