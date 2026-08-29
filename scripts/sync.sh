@@ -32,6 +32,18 @@ pin() {
     printf '%s' "$value"
 }
 
+path_without_virtualenv() {
+    local out="" entry
+    local IFS=:
+    for entry in $PATH; do
+        if [ -n "${VIRTUAL_ENV-}" ] && [ "$entry" = "$VIRTUAL_ENV/bin" ]; then
+            continue
+        fi
+        out="${out:+$out:}$entry"
+    done
+    printf '%s' "$out"
+}
+
 report() {
     local stage="$1" started="$2"
     local elapsed=$(( SECONDS - started ))
@@ -126,12 +138,11 @@ target_cpu_only = True;
 EOF
 
     say "running gclient sync with hooks, this brings chromium's own toolchain"
-    env \
+    env -u VPYTHON_BYPASS -u VIRTUAL_ENV -u PYTHONPATH -u PYTHONHOME \
         GCLIENT_FILE="$staging/.gclient" \
         DEPOT_TOOLS_UPDATE=0 \
         PYTHONDONTWRITEBYTECODE=1 \
-        VPYTHON_BYPASS="manually managed python not supported by chrome operations" \
-        PATH="$dt:$PATH" \
+        PATH="$dt:$(path_without_virtualenv)" \
         "$dt/gclient" sync -f -D -R --no-history
 
     local clang="$SRC/third_party/llvm-build/Release+Asserts/bin/clang"
