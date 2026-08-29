@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-STAGES="verify source"
+STAGES="verify source deps"
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PINS="$ROOT/config/pins"
@@ -74,6 +74,72 @@ stage_source() {
     [ "$head" = "$commit" ] || die "source is $head but the pin says $commit"
     say "source verified at $commit"
     report source "$started"
+}
+
+stage_deps() {
+    local started=$SECONDS
+    local staging="$TREE/.staging"
+    local dt="$staging/depot_tools"
+    local marker="$staging/deps-synced-at"
+    local head dt_commit
+
+    [ -d "$SRC/.git" ] || die "the source stage has not run, there is no tree at $SRC"
+    head="$(git -C "$SRC" rev-parse HEAD)"
+
+    if [ -f "$marker" ] && [ "$(cat "$marker")" = "$head" ]; then
+        say "deps already synced for $head, nothing to do"
+        return 0
+    fi
+
+    dt_commit="$(sed -n "s|.*depot_tools\.git' + '@' + '\([0-9a-f]\{40\}\)'.*|\1|p" "$SRC/DEPS" | head -1)"
+    [ -n "$dt_commit" ] || die "could not read the depot_tools commit out of $SRC/DEPS"
+    say "depot_tools pinned by DEPS at $dt_commit"
+
+    mkdir -p "$staging"
+    if [ ! -d "$dt/.git" ]; then
+        rm -rf "$dt"
+        mkdir -p "$dt"
+        git -C "$dt" init -q
+        git -C "$dt" remote add origin \
+            "https://chromium.googlesource.com/chromium/tools/depot_tools"
+    fi
+    git -C "$dt" fetch --depth=1 origin "$dt_commit"
+    git -C "$dt" reset --hard "$dt_commit"
+    git -C "$dt" clean -ffdx
+
+    cat > "$staging/.gclient" <<EOF
+solutions = [
+  {
+    "name": "$SRC",
+    "url": "https://chromium.googlesource.com/chromium/src.git",
+    "managed": False,
+    "custom_deps": {},
+    "custom_vars": {
+      "checkout_configuration": "small",
+    },
+  },
+];
+target_os = ['mac'];
+target_os_only = True;
+target_cpu = ['arm64', 'x64'];
+target_cpu_only = True;
+EOF
+
+    say "running gclient sync with hooks, this brings chromium's own toolchain"
+    env \
+        GCLIENT_FILE="$staging/.gclient" \
+        DEPOT_TOOLS_UPDATE=0 \
+        PYTHONDONTWRITEBYTECODE=1 \
+        VPYTHON_BYPASS="manually managed python not supported by chrome operations" \
+        PATH="$dt:$PATH" \
+        "$dt/gclient" sync -f -D -R --no-history
+
+    local clang="$SRC/third_party/llvm-build/Release+Asserts/bin/clang"
+    [ -x "$clang" ] || die "gclient finished but chromium's own clang is not at $clang"
+    say "chromium's own clang is in place: $("$clang" --version | head -1)"
+
+    printf '%s' "$head" > "$marker"
+    report deps "$started"
 }
 
 run_stage() {
