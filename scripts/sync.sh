@@ -120,16 +120,20 @@ stage_deps() {
     say "depot_tools pinned by DEPS at $dt_commit"
 
     mkdir -p "$staging"
-    if [ ! -d "$dt/.git" ]; then
-        rm -rf "$dt"
-        mkdir -p "$dt"
-        git -C "$dt" init -q
-        git -C "$dt" remote add origin \
-            "https://chromium.googlesource.com/chromium/tools/depot_tools"
+    if [ -d "$dt/.git" ] && [ "$(git -C "$dt" rev-parse HEAD 2>/dev/null)" = "$dt_commit" ]; then
+        say "depot_tools already at $dt_commit, keeping its bootstrapped state"
+    else
+        if [ ! -d "$dt/.git" ]; then
+            rm -rf "$dt"
+            mkdir -p "$dt"
+            git -C "$dt" init -q
+            git -C "$dt" remote add origin \
+                "https://chromium.googlesource.com/chromium/tools/depot_tools"
+        fi
+        git -C "$dt" fetch --depth=1 origin "$dt_commit"
+        git -C "$dt" reset --hard "$dt_commit"
+        git -C "$dt" clean -ffd
     fi
-    git -C "$dt" fetch --depth=1 origin "$dt_commit"
-    git -C "$dt" reset --hard "$dt_commit"
-    git -C "$dt" clean -ffdx
 
     if [ -e "$ROOT/src" ]; then
         die "a stray $ROOT/src exists, left by a sync that used the wrong layout; remove it and run again"
