@@ -119,10 +119,14 @@ stage_deps() {
     git -C "$dt" reset --hard "$dt_commit"
     git -C "$dt" clean -ffdx
 
-    cat > "$staging/.gclient" <<EOF
+    if [ -e "$ROOT/src" ]; then
+        die "a stray $ROOT/src exists, left by a sync that used the wrong layout; remove it and run again"
+    fi
+
+    cat > "$TREE/.gclient" <<EOF
 solutions = [
   {
-    "name": "$SRC",
+    "name": "src",
     "url": "https://chromium.googlesource.com/chromium/src.git",
     "managed": False,
     "custom_deps": {},
@@ -138,12 +142,12 @@ target_cpu_only = True;
 EOF
 
     say "running gclient sync with hooks, this brings chromium's own toolchain"
-    env -u VPYTHON_BYPASS -u VIRTUAL_ENV -u PYTHONPATH -u PYTHONHOME \
-        GCLIENT_FILE="$staging/.gclient" \
+    ( cd "$TREE" && env -u VPYTHON_BYPASS -u VIRTUAL_ENV -u PYTHONPATH -u PYTHONHOME \
+        GCLIENT_FILE="$TREE/.gclient" \
         DEPOT_TOOLS_UPDATE=0 \
         PYTHONDONTWRITEBYTECODE=1 \
         PATH="$dt:$(path_without_virtualenv)" \
-        "$dt/gclient" sync -f -D -R --no-history
+        "$dt/gclient" sync -f -D -R --no-history )
 
     local clang="$SRC/third_party/llvm-build/Release+Asserts/bin/clang"
     [ -x "$clang" ] || die "gclient finished but chromium's own clang is not at $clang"
