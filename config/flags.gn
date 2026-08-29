@@ -1,0 +1,14 @@
+is_official_build=true
+is_debug=false
+is_clang=true
+enable_rust=true
+use_thin_lto=true
+chrome_pgo_phase=2
+symbol_level=1
+blink_symbol_level=0
+enable_iterator_debugging=false
+enable_updater=false
+proprietary_codecs=true
+ffmpeg_branding="Chrome"
+enable_swiftshader=true
+use_sysroot=false

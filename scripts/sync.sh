@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-STAGES="verify source deps"
+STAGES="verify source deps configure"
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PINS="$ROOT/config/pins"
+FLAGS="$ROOT/config/flags.gn"
 TREE="$ROOT/chromium"
 SRC="$TREE/src"
 CHROMIUM_REMOTE="https://chromium.googlesource.com/chromium/src"
@@ -89,6 +90,7 @@ stage_source() {
 }
 
 PGO_TARGETS="mac mac-arm"
+ARCHS="arm64 x64"
 
 pgo_profiles_present() {
     local target name
@@ -183,6 +185,37 @@ EOF
 
     printf '%s' "$head" > "$marker"
     report deps "$started"
+}
+
+stage_configure() {
+    local started=$SECONDS
+    local gn="$SRC/buildtools/mac/gn"
+    local arch out desired
+
+    [ -x "$gn" ] || die "no gn at $gn, the deps stage has not finished"
+    [ -f "$FLAGS" ] || die "no build flags at $FLAGS"
+
+    for arch in $ARCHS; do
+        out="$SRC/out/$arch"
+        desired="$out/.args.desired"
+        mkdir -p "$out"
+        { cat "$FLAGS"; echo "target_cpu = \"$arch\""; } > "$desired"
+
+        if [ -f "$out/args.gn" ] && [ -f "$out/build.ninja" ] && cmp -s "$out/args.gn" "$desired"; then
+            rm -f "$desired"
+            say "configure for $arch is already current"
+            continue
+        fi
+
+        mv "$desired" "$out/args.gn"
+        say "generating build files for $arch"
+        ( cd "$SRC" && env -u VPYTHON_BYPASS -u VIRTUAL_ENV -u PYTHONPATH -u PYTHONHOME \
+            PATH="$TREE/.staging/depot_tools:$(path_without_virtualenv)" \
+            "$gn" gen "out/$arch" --fail-on-unused-args )
+        [ -f "$out/build.ninja" ] || die "gn gen finished but there is no build.ninja in $out"
+    done
+
+    report configure "$started"
 }
 
 run_stage() {
