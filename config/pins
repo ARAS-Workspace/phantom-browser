@@ -2,4 +2,3 @@ chromium.version = 153.0.8010.12
 chromium.commit = 971a7443b0c9b0a9b2860529b33331b76077ec62
 gsutil.version = 5.35
 gsutil.commit = 141e2a098f56e3ba4bcebb1a5cf89947efece4a4
-gn.commit = c1b663788ed1ecf2ffd53781c98ae2291ee002cf

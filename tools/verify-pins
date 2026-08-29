@@ -5,7 +5,7 @@ usage() {
     echo "usage: verify-pins [path]   (default: config/pins)"
 }
 
-REQUIRED_KEYS="chromium.version chromium.commit gsutil.version gsutil.commit gn.commit"
+REQUIRED_KEYS="chromium.version chromium.commit gsutil.version gsutil.commit"
 
 case "${1-}" in
     -h|--help) usage; exit 0 ;;
