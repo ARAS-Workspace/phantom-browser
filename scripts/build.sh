@@ -59,6 +59,8 @@ ninja="$SRC/third_party/ninja/ninja"
 [ -f "$out/build.ninja" ] || die "no build files in $out, run 'sync.sh configure' first"
 [ -x "$ninja" ] || die "no ninja at $ninja, the deps stage has not finished"
 
+"$ROOT/tools/verify-host"
+
 started=$SECONDS
 say "building $TARGET for $arch with -j $jobs"
 say "started at $(date '+%Y-%m-%d %H:%M:%S')"

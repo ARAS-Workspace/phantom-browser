@@ -55,6 +55,7 @@ report() {
 
 stage_verify() {
     "$ROOT/tools/verify-pins" "$PINS"
+    "$ROOT/tools/verify-host"
 }
 
 stage_source() {
