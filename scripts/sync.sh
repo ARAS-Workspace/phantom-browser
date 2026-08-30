@@ -3,12 +3,13 @@ set -euo pipefail
 
 STAGES="verify source deps configure"
 
+CORE_REMOTE="git@github.com:ARAS-Workspace/phantom-browser-core.git"
+CORE_BRANCH="phantom"
+
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PINS="$ROOT/config/pins"
 FLAGS="$ROOT/config/flags.gn"
 TREE="$ROOT/chromium"
 SRC="$TREE/src"
-CHROMIUM_REMOTE="https://chromium.googlesource.com/chromium/src"
 
 usage() {
     echo "usage: sync.sh [stage...]"
@@ -25,12 +26,14 @@ say() {
     echo "sync: $*"
 }
 
-pin() {
-    local key="$1" pattern value
-    pattern="$(printf '%s' "$key" | sed 's|\.|\\.|g')"
-    value="$(sed -n "s|^${pattern} = ||p" "$PINS" | head -1)"
-    [ -n "$value" ] || die "pin not found: $key"
-    printf '%s' "$value"
+chromium_version() {
+    local file="$SRC/chrome/VERSION" version
+    [ -f "$file" ] || die "no version file at $file"
+    version="$(awk -F= '/^(MAJOR|MINOR|BUILD|PATCH)=/ { v[$1] = $2 }
+        END { printf "%s.%s.%s.%s", v["MAJOR"], v["MINOR"], v["BUILD"], v["PATCH"] }' "$file")"
+    [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] \
+        || die "could not read a version out of $file, got: $version"
+    printf '%s' "$version"
 }
 
 path_without_virtualenv() {
@@ -54,44 +57,46 @@ report() {
 }
 
 stage_verify() {
-    "$ROOT/tools/verify-pins" "$PINS"
     "$ROOT/tools/verify-host"
 }
 
 stage_source() {
     local started=$SECONDS
-    local version commit head
-    version="$(pin chromium.version)"
-    commit="$(pin chromium.commit)"
+    local head before
 
     if [ -e "$SRC" ] && [ ! -d "$SRC/.git" ]; then
         die "$SRC exists but is not a git checkout, most likely an interrupted clone; remove it with 'rm -rf $TREE' and run again"
     fi
 
     if [ -d "$SRC/.git" ]; then
-        head="$(git -C "$SRC" rev-parse HEAD)"
-        if [ "$head" = "$commit" ]; then
-            say "source already at $version ($commit), nothing to do"
-            return 0
-        fi
-        say "source is at $head, moving to $version ($commit)"
-        git -C "$SRC" fetch origin tag "$version" --depth=2
+        before="$(git -C "$SRC" rev-parse HEAD)"
+        say "source is at $before, fetching $CORE_BRANCH"
+        git -C "$SRC" fetch --depth=1 origin "$CORE_BRANCH"
         git -C "$SRC" reset --hard FETCH_HEAD
     else
-        say "cloning chromium $version (depth 2)"
+        say "cloning $CORE_REMOTE at $CORE_BRANCH (depth 1)"
         mkdir -p "$TREE"
-        git clone -c advice.detachedHead=false -b "$version" --depth=2 \
-            "$CHROMIUM_REMOTE" "$SRC"
+        git clone -c advice.detachedHead=false --depth=1 --branch "$CORE_BRANCH" \
+            "$CORE_REMOTE" "$SRC"
     fi
 
     head="$(git -C "$SRC" rev-parse HEAD)"
-    [ "$head" = "$commit" ] || die "source is $head but the pin says $commit"
-    say "source verified at $commit"
+    say "source at $head, chromium $(chromium_version)"
     report source "$started"
 }
 
 PGO_TARGETS="mac mac-arm"
 ARCHS="arm64 x64"
+DEPS_PATHS="v8 third_party/angle third_party/skia third_party/dawn"
+
+deps_paths_present() {
+    local path
+    for path in $DEPS_PATHS; do
+        [ -d "$SRC/$path/.git" ] || [ -f "$SRC/$path/.git" ] || return 1
+        [ -n "$(ls -A "$SRC/$path" 2>/dev/null)" ] || return 1
+    done
+    return 0
+}
 
 pgo_profiles_present() {
     local target name
@@ -114,7 +119,8 @@ stage_deps() {
     [ -d "$SRC/.git" ] || die "the source stage has not run, there is no tree at $SRC"
     head="$(git -C "$SRC" rev-parse HEAD)"
 
-    if [ -f "$marker" ] && [ "$(cat "$marker")" = "$head" ] && pgo_profiles_present; then
+    if [ -f "$marker" ] && [ "$(cat "$marker")" = "$head" ] && pgo_profiles_present &&
+        deps_paths_present; then
         say "deps already synced for $head, nothing to do"
         return 0
     fi
@@ -177,6 +183,9 @@ EOF
     pgo_profiles_present || die "the hooks did not leave the pgo profiles this build needs on disk"
     say "pgo profiles in place: chrome ($PGO_TARGETS) and v8 builtins"
 
+    deps_paths_present || die "gclient finished but a dependency tree is missing or empty ($DEPS_PATHS)"
+    say "dependency trees in place: $DEPS_PATHS"
+
     printf '%s' "$head" > "$marker"
     report deps "$started"
 }
@@ -223,8 +232,6 @@ run_stage() {
 case "${1-}" in
     -h|--help) usage; exit 0 ;;
 esac
-
-[ -f "$PINS" ] || die "no pin file at $PINS"
 
 if [ $# -eq 0 ]; then
     for stage in $STAGES; do run_stage "$stage"; done
