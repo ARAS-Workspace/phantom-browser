@@ -3,15 +3,15 @@ set -euo pipefail
 
 DEFAULT_ARCH=arm64
 DEFAULT_JOBS=10
-TARGET=chrome
+DEFAULT_TARGET=chrome
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TREE="$ROOT/chromium"
 SRC="$TREE/src"
 
 usage() {
-    echo "usage: build.sh [arch] [-j N]"
-    echo "arch defaults to $DEFAULT_ARCH, -j defaults to $DEFAULT_JOBS, target is $TARGET"
+    echo "usage: build.sh [arch] [-j N] [target...]"
+    echo "arch defaults to $DEFAULT_ARCH, -j defaults to $DEFAULT_JOBS, target defaults to $DEFAULT_TARGET"
 }
 
 die() {
@@ -37,6 +37,8 @@ path_without_virtualenv() {
 
 arch="$DEFAULT_ARCH"
 jobs="$DEFAULT_JOBS"
+targets=""
+seen_arch=""
 
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -44,10 +46,19 @@ while [ $# -gt 0 ]; do
         -j) shift; [ $# -gt 0 ] || die "-j needs a number"; jobs="$1" ;;
         -j*) jobs="${1#-j}" ;;
         -*) die "unknown option: $1" ;;
-        *) arch="$1" ;;
+        *)
+            if [ -z "$seen_arch" ]; then
+                arch="$1"
+                seen_arch=yes
+            else
+                targets="${targets:+$targets }$1"
+            fi
+            ;;
     esac
     shift
 done
+
+targets="${targets:-$DEFAULT_TARGET}"
 
 case "$jobs" in
     ''|*[!0-9]*) die "-j must be a number, got: $jobs" ;;
@@ -62,12 +73,18 @@ ninja="$SRC/third_party/ninja/ninja"
 "$ROOT/tools/verify-host"
 
 started=$SECONDS
-say "building $TARGET for $arch with -j $jobs"
+say "building $targets for $arch with -j $jobs"
 say "started at $(date '+%Y-%m-%d %H:%M:%S')"
 
 ( cd "$SRC" && env -u VPYTHON_BYPASS -u VIRTUAL_ENV -u PYTHONPATH -u PYTHONHOME \
     PATH="$TREE/.staging/depot_tools:$(path_without_virtualenv)" \
-    "$ninja" -C "out/$arch" -j "$jobs" "$TARGET" )
+    "$ninja" -C "out/$arch" -j "$jobs" $targets )
+
+if [ "$targets" != "$DEFAULT_TARGET" ]; then
+    elapsed=$(( SECONDS - started ))
+    say "built $targets in ${elapsed}s"
+    exit 0
+fi
 
 app="$out/Chromium.app"
 [ -d "$app" ] || die "ninja finished but there is no app at $app"
