@@ -172,6 +172,7 @@ EOF
     ( cd "$TREE" && env -u VPYTHON_BYPASS -u VIRTUAL_ENV -u PYTHONPATH -u PYTHONHOME \
         GCLIENT_FILE="$TREE/.gclient" \
         DEPOT_TOOLS_UPDATE=0 \
+        DEPOT_TOOLS_METRICS=0 \
         PYTHONDONTWRITEBYTECODE=1 \
         PATH="$dt:$(path_without_virtualenv)" \
         "$dt/gclient" sync -f -D -R --no-history )
