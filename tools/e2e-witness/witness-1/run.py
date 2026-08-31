@@ -28,6 +28,15 @@ def framework_of(browser):
                         "Chromium Framework.framework", "Versions", "Current",
                         "Chromium Framework")
 
+
+def locale_pak_of(browser):
+    """The english strings that ship with the given binary."""
+    app = os.path.dirname(os.path.dirname(os.path.dirname(browser)))
+    return os.path.join(app, "Contents", "Frameworks",
+                        "Chromium Framework.framework", "Versions", "Current",
+                        "Resources", "en.lproj", "locale.pak")
+
+
 # The browser is started in a zone that is not ours, so that the time zone
 # witness fails when the override is missing instead of agreeing with the host.
 HOST_TZ = "America/Los_Angeles"
@@ -183,6 +192,17 @@ def framework_has_speech_symbols(framework):
     hits = sorted({l.strip() for l in out.stdout.splitlines()
                    if "AVSpeech" in l or "NSSpeechSynthesizer" in l})
     return len(hits) == 0, ", ".join(hits) if hits else "no AVSpeech or NSSpeech symbol"
+
+
+def locale_pak_has_speech_menu(pak):
+    """The speech submenu and the strings it was built from are both gone."""
+    if not os.path.exists(pak):
+        return None, "locale.pak not found at " + pak
+    with open(pak, "rb") as f:
+        blob = f.read()
+    hits = [s for s in (b"Start Speaking", b"Stop Speaking") if s in blob]
+    return not hits, (", ".join(h.decode() for h in hits) + " still shipped"
+                      if hits else "neither menu string ships")
 
 
 PRECONDITIONS = ("harness-integrity", "secure-context", "positive-control")
@@ -352,10 +372,15 @@ def run_pass(args, red):
     if results is None:
         sys.exit("witness: the page never reported back within %ds" % args.timeout)
 
-    # The binary witness needs no browser.
+    # The artifact witnesses need no browser.
     ok, detail = framework_has_speech_symbols(framework_of(args.browser))
     if ok is not None:
         results.append({"id": "speech-symbols", "commit": "e440b9758f",
+                        "ok": ok, "detail": detail, "red_gated": False,
+                        "manual": False})
+    ok, detail = locale_pak_has_speech_menu(locale_pak_of(args.browser))
+    if ok is not None:
+        results.append({"id": "speech-menu-strings", "commit": "bd18790f21",
                         "ok": ok, "detail": detail, "red_gated": False,
                         "manual": False})
     return results
