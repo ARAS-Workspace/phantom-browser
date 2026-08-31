@@ -234,9 +234,11 @@ def locale_pak_has_speech_menu(pak):
                       if hits else "neither menu string ships")
 
 
-# An option the settings dialogs still offer, read before any absence is
-# reported so that an unreadable or wrong pak says so instead of reading green.
+# Strings this browser still ships, read before any absence is reported so that
+# an unreadable or wrong pak says so instead of reading green. Each absence
+# check names the control that covers its own part of the string table.
 SHIPPED_SETTINGS_OPTION = b"Cached images and files"
+SHIPPED_READING_MODE_STRING = b"Read comfortably with minimal distractions"
 
 
 def locale_pak_lacks_option(pak, option):
@@ -250,6 +252,21 @@ def locale_pak_lacks_option(pak, option):
     name = option.decode()
     gone = option not in blob
     return gone, ("no %s option" % name if gone else "%s still shipped" % name)
+
+
+def locale_pak_lacks_strings(pak, absent, control, control_name):
+    """Strings for a surface this browser removed are not among the ones it
+    ships. The control is a neighbouring string that is still shipped, so a pak
+    that cannot be read reports itself rather than reading as an absence."""
+    if not os.path.exists(pak):
+        return None, "locale.pak not found at " + pak
+    with open(pak, "rb") as f:
+        blob = f.read()
+    if control not in blob:
+        return None, "the shipped strings do not carry " + control_name
+    hits = [s for s in absent if s in blob]
+    return not hits, (", ".join(h.decode() for h in hits) + " still shipped"
+                      if hits else "none of the %d strings ship" % len(absent))
 
 PRECONDITIONS = ("harness-integrity", "secure-context", "positive-control")
 
@@ -450,6 +467,34 @@ def run_pass(args, red):
         results.append({"id": "hosted-app-data-option", "commit": "8cd33b5365",
                         "ok": ok, "detail": detail, "red_gated": False,
                         "manual": False})
+    for check_id, commit, absent, control, control_name in (
+            ("security-keys-strings", "f8521c87ab",
+             [b"Manage security keys"],
+             SHIPPED_SETTINGS_OPTION, "the settings list"),
+            ("privacy-guide-strings", "71962fc25d",
+             [b"A guide of your privacy choices"],
+             SHIPPED_SETTINGS_OPTION, "the settings list"),
+            ("translate-settings-strings", "249059a2c7",
+             [b"Use Google Translate"],
+             SHIPPED_SETTINGS_OPTION, "the settings list"),
+            ("leak-detection-strings", "e46c63ac1b",
+             [b"Compromised password detection"],
+             SHIPPED_SETTINGS_OPTION, "the settings list"),
+            ("reading-mode-strings", "8f95aed635",
+             [b"Open in Reading Mode", b"Listen to This Page"],
+             SHIPPED_READING_MODE_STRING, "the reading mode strings"),
+            ("safety-hub-password-card-strings", "ac37598e50",
+             [b"No weak or reused passwords"],
+             SHIPPED_SETTINGS_OPTION, "the settings list"),
+            ("accessibility-section-strings", "b3819a8f26",
+             [b"Copied to clipboard confirmations"],
+             SHIPPED_SETTINGS_OPTION, "the settings list"),
+    ):
+        ok, detail = locale_pak_lacks_strings(pak, absent, control, control_name)
+        if ok is not None:
+            results.append({"id": check_id, "commit": commit, "ok": ok,
+                            "detail": detail, "red_gated": False,
+                            "manual": False})
     return results
 
 
