@@ -265,8 +265,11 @@ def locale_pak_lacks_strings(pak, absent, control, control_name):
     if control not in blob:
         return None, "the shipped strings do not carry " + control_name
     hits = [s for s in absent if s in blob]
-    return not hits, (", ".join(h.decode() for h in hits) + " still shipped"
-                      if hits else "none of the %d strings ship" % len(absent))
+    if hits:
+        return False, ", ".join(h.decode() for h in hits) + " still shipped"
+    if len(absent) == 1:
+        return True, "%s does not ship" % absent[0].decode()
+    return True, "none of the %d strings ship" % len(absent)
 
 PRECONDITIONS = ("harness-integrity", "secure-context", "positive-control")
 
@@ -362,10 +365,13 @@ def report(green, red):
                for mode, results in (("green", green), ("red", red))}
 
     failures = fakes = gated = 0
+    # The column is as wide as the longest name, so a new check cannot silently
+    # push the table out of alignment.
+    width = max([len("CHECK")] + [len(name) for name in order])
+    row = "  %-" + str(width) + "s %-11s %-7s %-7s %s"
     print()
-    print("  %-22s %-11s %-7s %-7s %s"
-          % ("CHECK", "COMMIT", "GREEN", "RED", "DETAIL"))
-    print("  " + "-" * 76)
+    print(row % ("CHECK", "COMMIT", "GREEN", "RED", "DETAIL"))
+    print("  " + "-" * (width + 54))
     for name in order:
         cells, detail = {}, ""
         for mode, is_red in (("green", False), ("red", True)):
@@ -385,7 +391,7 @@ def report(green, red):
                 detail = found["detail"]
         if cells["red"] in ("PASS", "FAIL"):
             cells["red"] = "."          # not restorable by a flag, so not judged
-        print("  %-22s %-11s %-7s %-7s %s"
+        print(row
               % (name, by_mode["green"].get(name, by_mode["red"].get(name, {}))
                  .get("commit", "")[:10], cells["green"], cells["red"], detail))
 
