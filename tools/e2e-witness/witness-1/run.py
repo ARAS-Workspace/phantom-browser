@@ -234,19 +234,22 @@ def locale_pak_has_speech_menu(pak):
                       if hits else "neither menu string ships")
 
 
-def locale_pak_has_form_data_option(pak):
-    """The delete browsing data dialog no longer offers autofill form data."""
+# An option the settings dialogs still offer, read before any absence is
+# reported so that an unreadable or wrong pak says so instead of reading green.
+SHIPPED_SETTINGS_OPTION = b"Cached images and files"
+
+
+def locale_pak_lacks_option(pak, option):
+    """An option this browser no longer offers is not among its strings."""
     if not os.path.exists(pak):
         return None, "locale.pak not found at " + pak
     with open(pak, "rb") as f:
         blob = f.read()
-    # A neighbour from the same list, so an unreadable or wrong pak reports
-    # itself instead of reading as an absence.
-    if b"Hosted app data" not in blob:
-        return None, "the shipped strings do not look like the dialog's list"
-    gone = b"Autofill form data" not in blob
-    return gone, ("no autofill form data option" if gone
-                  else "Autofill form data still shipped")
+    if SHIPPED_SETTINGS_OPTION not in blob:
+        return None, "the shipped strings do not look like the settings list"
+    name = option.decode()
+    gone = option not in blob
+    return gone, ("no %s option" % name if gone else "%s still shipped" % name)
 
 PRECONDITIONS = ("harness-integrity", "secure-context", "positive-control")
 
@@ -436,9 +439,15 @@ def run_pass(args, red):
         results.append({"id": "app-helper-binaries", "commit": "9c4f833a09",
                         "ok": ok, "detail": detail, "red_gated": False,
                         "manual": False})
-    ok, detail = locale_pak_has_form_data_option(locale_pak_of(args.browser))
+    pak = locale_pak_of(args.browser)
+    ok, detail = locale_pak_lacks_option(pak, b"Autofill form data")
     if ok is not None:
-        results.append({"id": "clear-form-data-option", "commit": "57b50e2c51",
+        results.append({"id": "form-data-option", "commit": "8cd33b5365",
+                        "ok": ok, "detail": detail, "red_gated": False,
+                        "manual": False})
+    ok, detail = locale_pak_lacks_option(pak, b"Hosted app data")
+    if ok is not None:
+        results.append({"id": "hosted-app-data-option", "commit": "8cd33b5365",
                         "ok": ok, "detail": detail, "red_gated": False,
                         "manual": False})
     return results
