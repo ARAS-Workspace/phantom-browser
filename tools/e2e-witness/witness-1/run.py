@@ -39,7 +39,7 @@ RED_FEATURES = [
     "ScriptedSpeechRecognition", "UnprefixedSpeechRecognition",
     "WebSpeechRecognitionContext", "AppBanner", "InstalledApp",
     "NetworkInformationAPI", "CpuPerformance", "FontAccess", "Gamepad",
-    "WebUSB", "WebHID", "WebBluetooth", "Serial",
+    "WebUSB", "WebHID", "WebBluetooth", "Serial", "BarcodeDetector",
 ]
 
 
@@ -155,6 +155,9 @@ def seed_profile(directory, origin):
     os.makedirs(default, exist_ok=True)
     prefs = {
         "profile": {
+            # The policy provider outranks the per site setting, and it reads
+            # this list straight out of the pref service.
+            "managed_geolocation_allowed_for_urls": [origin],
             "default_content_setting_values": {"geolocation": 1},
             "content_settings": {
                 "exceptions": {
@@ -187,6 +190,10 @@ PRECONDITIONS = ("harness-integrity", "secure-context", "positive-control")
 
 def verdict(result, red):
     """Label for one result, and whether it counts against the run."""
+    if result.get("manual"):
+        # Confirmed by hand; the harness cannot drive it, so it is reported
+        # without being counted either way.
+        return ("MANUAL", False)
     if not red:
         return ("PASS", False) if result["ok"] else ("FAIL", True)
     if not result["red_gated"]:
@@ -223,6 +230,9 @@ def browser_argv(args, profile, origin, red):
             "--no-default-browser-check",
             "--disable-search-engine-choice-screen",
             "--disable-features=DialMediaRouteProvider",
+            *(["--enable-logging=stderr", "--v=0",
+               "--vmodule=permission*=2,geolocation*=2,*content_setting*=2"]
+              if args.browser_log else []),
             "--window-size=900,700"]
     if args.headless:
         argv.append("--headless=new")
@@ -237,8 +247,9 @@ def collect(args, origin, profile, server, red):
     # The host is already in Istanbul, so the time zone check could not go red
     # unless the browser is started somewhere else.
     env = dict(os.environ, TZ=HOST_TZ)
+    quiet = None if args.browser_log else subprocess.DEVNULL
     proc = subprocess.Popen(browser_argv(args, profile, origin, red), env=env,
-                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                            stdout=quiet, stderr=quiet)
     try:
         return server.results.get(timeout=args.timeout)
     except queue.Empty:
@@ -250,7 +261,10 @@ def collect(args, origin, profile, server, red):
         except subprocess.TimeoutExpired:
             proc.kill()
         server.shutdown()
-        shutil.rmtree(profile, ignore_errors=True)
+        if args.keep_profile:
+            print("witness: profile kept at " + profile)
+        else:
+            shutil.rmtree(profile, ignore_errors=True)
 
 
 def report(green, red):
@@ -342,7 +356,8 @@ def run_pass(args, red):
     ok, detail = framework_has_speech_symbols(framework_of(args.browser))
     if ok is not None:
         results.append({"id": "speech-symbols", "commit": "e440b9758f",
-                        "ok": ok, "detail": detail, "red_gated": False})
+                        "ok": ok, "detail": detail, "red_gated": False,
+                        "manual": False})
     return results
 
 
@@ -356,6 +371,12 @@ def main():
     ap.add_argument("--red", action="store_true",
                     help="only the red pass, which turns the disabled features "
                          "back on so a check that stays green is named a fake")
+    ap.add_argument("--browser-log", action="store_true",
+                    help="let the browser write to stderr instead of discarding "
+                         "it, for asking it why it did something")
+    ap.add_argument("--keep-profile", action="store_true",
+                    help="leave the throwaway profile on disk and print its "
+                         "path, for looking at what the browser wrote back")
     ap.add_argument("--self-test", action="store_true",
                     help="serve one unparseable check and expect the run to be "
                          "declared invalid; proves the integrity gate can fail")

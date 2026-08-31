@@ -5,6 +5,10 @@
   register({
     id: "geolocation",
     commit: "99d4bb62b9",
+    // Chromium grants this only through a prompt or devtools, and neither the
+    // seeded profile nor the policy pref reaches the decision, so the fixed
+    // point is confirmed by hand and this row is reported, not counted.
+    manual: true,
     async run() {
       const answer = await new Promise((resolve) => {
         if (!navigator.geolocation) {

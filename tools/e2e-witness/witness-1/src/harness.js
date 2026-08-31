@@ -54,6 +54,7 @@ async function runAll() {
       id: check.id,
       commit: check.commit,
       red_gated: !!check.redGated,
+      manual: !!check.manual,
       ok: !!verdict.ok,
       detail: String(verdict.detail),
     });

@@ -51,8 +51,9 @@ Each commit links to the change it is a witness for, in
 | `netinfo-hints` | [`29df60052d`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/29df60052dcd7e4c3f1ea5957697c1d4cfc670a1) | — | the rtt, downlink and ect headers are fixed |
 | `netinfo-js` | [`29df60052d`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/29df60052dcd7e4c3f1ea5957697c1d4cfc670a1) | yes | `navigator.connection` is absent |
 | `pwa-install` | [`1e2bd73662`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/1e2bd736622341bcca052281d091c1ef19dea9a6) | yes | the install prompt and the related apps query are absent |
+| `shape-detection` | [`43573e45f5`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/43573e45f5373104dc7000336c9343707bebcbf6) | yes | BarcodeDetector, FaceDetector and TextDetector are absent |
 | `speech` | [`ae2ee271d5`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/ae2ee271d5006f507489d27702ad6ae33704a33b) | yes | the fifteen web speech names are absent |
-| `speech-symbols` | [`e440b9758f`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/e440b9758f6772d9200305f5dedeedf8e966c83a) | — | the framework links no AVSpeech or NSSpeech symbol |
+| `speech-symbols` | [`e440b9758f`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/e440b9758f6772d9200305f5dedeedf8e966c83a) [`0da90c3b44`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/0da90c3b44f32940e6e8b351575c43693df34b74) | — | the framework links no AVSpeech or NSSpeech symbol |
 | `time-zone` | [`c82843dc63`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/c82843dc6318451d9a1fe989c670541bb9ca0ad3) | — | the zone is Europe/Istanbul while the browser runs elsewhere |
 | `ua-ch` | [`626ef1a669`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/626ef1a669db1150ee03152ddec39e476de6cd4b) | — | platform version and architecture agree with the frozen agent |
 | `web-midi` | [`96c02a5df6`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/96c02a5df65758384aea8fc474e54e6420b9b44b) | yes | `requestMIDIAccess` and the eight interfaces are absent |
@@ -62,6 +63,11 @@ Each commit links to the change it is a witness for, in
 
 A check with no `red` mark is not restorable by a flag; it fails on its own value
 instead, so a red pass reports it without judging it.
+
+`geolocation` reports as `MANUAL`. Chromium grants that permission through a
+prompt or devtools and neither a seeded profile nor the policy pref reaches the
+decision, so the fixed point is confirmed by hand and the row is reported
+without being counted either way.
 
 ## Layout
 
