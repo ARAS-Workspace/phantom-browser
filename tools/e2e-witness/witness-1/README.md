@@ -30,6 +30,30 @@ would be measuring us.
 | `secure-context` | the page is a secure context, so SecureContext gates mean ours |
 | `positive-control` | `crypto.subtle` and `navigator.credentials` are still there |
 
+
+## Declared without a check
+
+These commits declare a witness the harness cannot run today. They are listed so
+that a missing row reads as a known gap rather than as an absence of work. Each
+says why, and the reason is measured, not assumed.
+
+Two limits cause most of them. Settings markup ships inside `resources.pak` in
+brotli-compressed records this harness does not decompress, so no settings
+surface can be witnessed by a string. And a request that leaves the browser
+process is invisible to a page, which is what witness-2 is for.
+
+| commit | declares | why no check |
+|---|---|---|
+| [`9f4678b67f`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/9f4678b67f005f8cd8d21548ad0204a28f5ba892) | the autofill server is never asked to classify a form | the request leaves the browser process; nothing a page can see, and the host string still ships because only the gate was closed |
+| [`b3819a8f26`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/b3819a8f269161448e4767a06cc3692f7fbd02cd) | no speech model installer starts and live caption is unsupported | the installer is a startup call, not an artifact; the settings surface it also removed is inside a compressed pak |
+| [`a3a3e3d66a`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/a3a3e3d66aba90eb59209c7aff6ee5d40b80aacf) | no profile builds a password status check service | a service that is never constructed leaves nothing to read from outside |
+| [`c5591f5771`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/c5591f5771d483aad613244f8c8a79383ecfbbca) | visiting the google password site no longer closes its own tab | needs a navigation the harness does not drive; confirmed by hand |
+| [`f8521c87ab`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/f8521c87ab9b6fcdf5f3d838413c959b0414fffd) | a security key can no longer be managed from settings | the strings stay because the webauthn ceremony still reads three of them |
+| [`ac37598e50`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/ac37598e503fc6ac6c25bbbaf45a93e9a72efcaa) | the browser has no autofill and passwords settings | settings markup lives in a brotli compressed pak the harness cannot read |
+| [`71962fc25d`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/71962fc25ddc52e961cea8c804537a23770dae82) | no privacy guide | same compressed pak; two of its strings are still live elsewhere |
+| [`acc62e68f7`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/acc62e68f7b25a348495ebce9c8469fa1d35370a) | safety check reports no version and offers no education block | same compressed pak |
+| [`e46c63ac1b`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/e46c63ac1b5b7c5ad8a26583a2f4fc985916413d) | the security page offers no compromised password detection | same compressed pak |
+
 ## Checks
 
 Each commit links to the change it is a witness for, in
