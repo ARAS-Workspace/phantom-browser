@@ -212,6 +212,17 @@ def helpers_carry_app_makers(helpers):
                          if present else "neither app maker ships")
 
 
+def framework_has_leak_endpoint(framework):
+    """The leak check path is ours; the bare host also sits in the hsts list."""
+    if not os.path.exists(framework):
+        return None, "framework not found at " + framework
+    with open(framework, "rb") as f:
+        blob = f.read()
+    hit = b"leaks:lookupSingle" in blob
+    return not hit, ("the leaks lookupSingle path still ships" if hit
+                     else "no leaks lookupSingle path")
+
+
 def locale_pak_has_speech_menu(pak):
     """The speech submenu and the strings it was built from are both gone."""
     if not os.path.exists(pak):
@@ -399,6 +410,11 @@ def run_pass(args, red):
     ok, detail = locale_pak_has_speech_menu(locale_pak_of(args.browser))
     if ok is not None:
         results.append({"id": "speech-menu-strings", "commit": "bd18790f21",
+                        "ok": ok, "detail": detail, "red_gated": False,
+                        "manual": False})
+    ok, detail = framework_has_leak_endpoint(framework_of(args.browser))
+    if ok is not None:
+        results.append({"id": "password-leak-endpoint", "commit": "e7a47a978d",
                         "ok": ok, "detail": detail, "red_gated": False,
                         "manual": False})
     ok, detail = helpers_carry_app_makers(helpers_dir_of(args.browser))

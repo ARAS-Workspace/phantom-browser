@@ -51,6 +51,7 @@ Each commit links to the change it is a witness for, in
 | `local-font-access` | [`2390c75581`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/2390c75581125ae22c3f9a13a8fcbe6c90810a46) | yes | `queryLocalFonts` and `FontData` are absent |
 | `netinfo-hints` | [`29df60052d`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/29df60052dcd7e4c3f1ea5957697c1d4cfc670a1) | — | the rtt, downlink and ect headers are fixed |
 | `netinfo-js` | [`29df60052d`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/29df60052dcd7e4c3f1ea5957697c1d4cfc670a1) | yes | `navigator.connection` is absent |
+| `password-leak-endpoint` | [`e7a47a978d`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/e7a47a978d5cb75a89bf82938fb0c1fd0ab4f832) | — | the shipped binary carries no leak lookup path |
 | `pwa-install` | [`1e2bd73662`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/1e2bd736622341bcca052281d091c1ef19dea9a6) | yes | the install prompt and the related apps query are absent |
 | `shape-detection` | [`43573e45f5`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/43573e45f5373104dc7000336c9343707bebcbf6) | yes | BarcodeDetector, FaceDetector and TextDetector are absent |
 | `speech` | [`ae2ee271d5`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/ae2ee271d5006f507489d27702ad6ae33704a33b) | yes | the fifteen web speech names are absent |
