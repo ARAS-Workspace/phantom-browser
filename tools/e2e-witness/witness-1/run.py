@@ -194,6 +194,24 @@ def framework_has_speech_symbols(framework):
     return len(hits) == 0, ", ".join(hits) if hits else "no AVSpeech or NSSpeech symbol"
 
 
+def helpers_dir_of(browser):
+    """The executables that ship beside the framework's own helpers."""
+    app = os.path.dirname(os.path.dirname(os.path.dirname(browser)))
+    return os.path.join(app, "Contents", "Frameworks",
+                        "Chromium Framework.framework", "Versions", "Current",
+                        "Helpers")
+
+
+def helpers_carry_app_makers(helpers):
+    """Nothing ships whose only work is to write or launch an installed app."""
+    if not os.path.isdir(helpers):
+        return None, "no Helpers directory at " + helpers
+    present = [n for n in ("app_mode_loader", "web_app_shortcut_copier")
+               if os.path.exists(os.path.join(helpers, n))]
+    return not present, (", ".join(present) + " still ships"
+                         if present else "neither app maker ships")
+
+
 def locale_pak_has_speech_menu(pak):
     """The speech submenu and the strings it was built from are both gone."""
     if not os.path.exists(pak):
@@ -381,6 +399,11 @@ def run_pass(args, red):
     ok, detail = locale_pak_has_speech_menu(locale_pak_of(args.browser))
     if ok is not None:
         results.append({"id": "speech-menu-strings", "commit": "bd18790f21",
+                        "ok": ok, "detail": detail, "red_gated": False,
+                        "manual": False})
+    ok, detail = helpers_carry_app_makers(helpers_dir_of(args.browser))
+    if ok is not None:
+        results.append({"id": "app-helper-binaries", "commit": "9c4f833a09",
                         "ok": ok, "detail": detail, "red_gated": False,
                         "manual": False})
     return results
