@@ -229,6 +229,20 @@ def framework_has_leak_endpoint(framework):
 SHIPPED_GOOGLE_HOST = b"myaccount.google.com"
 
 
+def framework_has_lens_upload_endpoints(framework):
+    """The addresses the lens overlay uploaded pictures to are not shipped."""
+    if not os.path.exists(framework):
+        return None, "framework not found at " + framework
+    with open(framework, "rb") as f:
+        blob = f.read()
+    if SHIPPED_GOOGLE_HOST not in blob:
+        return None, "the framework does not read like a chromium binary"
+    hits = [s for s in (b"lensfrontend-pa.googleapis.com", b"/v1/uploadChunk",
+                        b"/v1/crupload", b"lens.google.com/v3/") if s in blob]
+    return not hits, (", ".join(h.decode() for h in hits) + " still ships"
+                      if hits else "no lens upload address")
+
+
 def framework_has_advanced_protection_url(framework):
     """The settings page no longer assembles the enrolment landing address."""
     if not os.path.exists(framework):
@@ -481,6 +495,11 @@ def run_pass(args, red):
         framework_of(args.browser))
     if ok is not None:
         results.append({"id": "advanced-protection-url", "commit": "d0a5407281",
+                        "ok": ok, "detail": detail, "red_gated": False,
+                        "manual": False})
+    ok, detail = framework_has_lens_upload_endpoints(framework_of(args.browser))
+    if ok is not None:
+        results.append({"id": "lens-upload-endpoints", "commit": "6146b4d3e2",
                         "ok": ok, "detail": detail, "red_gated": False,
                         "manual": False})
     ok, detail = helpers_carry_app_makers(helpers_dir_of(args.browser))
