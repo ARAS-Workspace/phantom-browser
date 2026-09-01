@@ -72,7 +72,7 @@ Each commit links to the change it is a witness for, in
 | `advanced-protection-url` | [`d0a5407281`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/d0a540728145b622de81ec4476674a4f7a40ca86) | — | the framework carries no landing address for the advanced protection programme |
 | `app-helper-binaries` | [`9c4f833a09`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/9c4f833a092ba76163231d8ab39accdcd4a39475) | — | no shipped executable exists only to make an installed app |
 | `battery` | [`5c2ec8efe2`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/5c2ec8efe2ec714a33d6d5c4894d995ce5c9f5da) | yes | the battery status api is absent |
-| `closed-feature-hosts` | [`a019850d10`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/a019850d10ce9b9e5a8a736ce34f70f6f3e28417) | — | the framework carries no autofill server or page translation address |
+| `closed-feature-hosts` | [`a019850d10`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/a019850d10ce9b9e5a8a736ce34f70f6f3e28417) | — | the framework carries no autofill server address and no translate script path |
 | `cpu-performance` | [`0b722323b7`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/0b722323b7d264b66f0b4ff750ce777c7668c393) | yes | the one to four hardware class is absent |
 | `device-apis` | [`a2b457f072`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/a2b457f072123ac566049f72c1e0f9944a5a82ba) | yes | usb, hid, bluetooth, serial and the gamepad list are absent |
 | `device-memory` | [`3c38f49f33`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/3c38f49f33ccebfc92dd2b26ae607fdb40e34e12) | — | the memory tier is absent and the core count reads eight |

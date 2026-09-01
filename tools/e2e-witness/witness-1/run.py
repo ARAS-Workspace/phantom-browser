@@ -251,10 +251,14 @@ def framework_has_closed_feature_hosts(framework):
         blob = f.read()
     if SHIPPED_GOOGLE_HOST not in blob:
         return None, "the framework does not read like a chromium binary"
+    # The translate host is also a line in the static hsts preload list, which
+    # ships with every build and is not ours to touch, so the path this fork
+    # removed is read instead of the host. The autofill host is not in that
+    # list and can be read whole.
     hits = [s for s in (b"content-autofill.googleapis.com",
-                        b"translate.googleapis.com") if s in blob]
+                        b"translate_a/element.js") if s in blob]
     return not hits, (", ".join(h.decode() for h in hits) + " still ships"
-                      if hits else "neither closed feature host ships")
+                      if hits else "no autofill server, no translate script")
 
 
 def framework_has_advanced_protection_url(framework):
