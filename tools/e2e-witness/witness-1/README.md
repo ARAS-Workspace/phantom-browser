@@ -62,6 +62,7 @@ still uses elsewhere cannot be told apart from them.
 | [`fba12b4f30`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/fba12b4f304ca90fcc0afb1e209d5136d6f376d9) | the translate internals page is not built and chrome about lists neither it nor the password manager | the page's own text is not localised and ships inside the compressed resource bundle, and the host table is rendered by a chrome page the harness cannot open |
 | [`acc62e68f7`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/acc62e68f7b25a348495ebce9c8469fa1d35370a) | safety check reports no version and offers no education block | same compressed pak |
 | [`580e249a20`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/580e249a20a4777129729032eb943c68bb52b10b) | no lens side panel action is registered | the title that action named is the word this build uses for lens in a dozen messages that still ship, so its absence reads the same as its presence, and an action that is never registered leaves nothing a page can ask about |
+| [`d8d27d1434`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/d8d27d1434) | no tab builds a lens homework page action controller | the label that action named is spelled in an unbranded build with a word the browser uses throughout, so its absence reads the same as its presence, and a per tab object that is never constructed leaves nothing a page can observe |
 
 ## Checks
 
