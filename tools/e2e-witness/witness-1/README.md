@@ -53,6 +53,7 @@ still uses elsewhere cannot be told apart from them.
 | [`9f4678b67f`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/9f4678b67f005f8cd8d21548ad0204a28f5ba892) | the autofill server is never asked to classify a form | the request leaves the browser process; nothing a page can see, and the host string still ships because only the gate was closed |
 | [`a3a3e3d66a`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/a3a3e3d66aba90eb59209c7aff6ee5d40b80aacf) | no profile builds a password status check service | a service that is never constructed leaves nothing to read from outside |
 | [`c5591f5771`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/c5591f5771d483aad613244f8c8a79383ecfbbca) | visiting the google password site no longer closes its own tab | needs a navigation the harness does not drive; confirmed by hand |
+| [`fba12b4f30`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/fba12b4f304ca90fcc0afb1e209d5136d6f376d9) | the translate internals page is not built and chrome about lists neither it nor the password manager | the page's own text is not localised and ships inside the compressed resource bundle, and the host table is rendered by a chrome page the harness cannot open |
 | [`acc62e68f7`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/acc62e68f7b25a348495ebce9c8469fa1d35370a) | safety check reports no version and offers no education block | same compressed pak |
 
 ## Checks
@@ -63,6 +64,7 @@ Each commit links to the change it is a witness for, in
 | check | commit | red | witnesses |
 |---|---|---|---|
 | `accessibility-section-strings` | [`b3819a8f26`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/b3819a8f269161448e4767a06cc3692f7fbd02cd) [`1544ddc9b2`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/1544ddc9b2328f7643bca29e5e020c64b73fb509) | — | the accessibility section's own strings are not in the shipped resources |
+| `advanced-protection-url` | [`d0a5407281`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/d0a540728145b622de81ec4476674a4f7a40ca86) | — | the framework carries no landing address for the advanced protection programme |
 | `app-helper-binaries` | [`9c4f833a09`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/9c4f833a092ba76163231d8ab39accdcd4a39475) | — | no shipped executable exists only to make an installed app |
 | `battery` | [`5c2ec8efe2`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/5c2ec8efe2ec714a33d6d5c4894d995ce5c9f5da) | yes | the battery status api is absent |
 | `cpu-performance` | [`0b722323b7`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/0b722323b7d264b66f0b4ff750ce777c7668c393) | yes | the one to four hardware class is absent |

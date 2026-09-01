@@ -223,6 +223,25 @@ def framework_has_leak_endpoint(framework):
                      else "no leaks lookupSingle path")
 
 
+# A google address the framework still carries, read before the absence below
+# so that an unreadable binary reports itself instead of reading green.
+SHIPPED_GOOGLE_HOST = b"myaccount.google.com"
+
+
+def framework_has_advanced_protection_url(framework):
+    """The settings page no longer assembles the enrolment landing address."""
+    if not os.path.exists(framework):
+        return None, "framework not found at " + framework
+    with open(framework, "rb") as f:
+        blob = f.read()
+    if SHIPPED_GOOGLE_HOST not in blob:
+        return None, "the framework does not read like a chromium binary"
+    hits = [s for s in (b"landing.google.com/advancedprotection",
+                        b"ChromeSecuritySettings") if s in blob]
+    return not hits, (", ".join(h.decode() for h in hits) + " still ships"
+                      if hits else "no advanced protection landing address")
+
+
 def locale_pak_has_speech_menu(pak):
     """The speech submenu and the strings it was built from are both gone."""
     if not os.path.exists(pak):
@@ -455,6 +474,12 @@ def run_pass(args, red):
     ok, detail = framework_has_leak_endpoint(framework_of(args.browser))
     if ok is not None:
         results.append({"id": "password-leak-endpoint", "commit": "e7a47a978d",
+                        "ok": ok, "detail": detail, "red_gated": False,
+                        "manual": False})
+    ok, detail = framework_has_advanced_protection_url(
+        framework_of(args.browser))
+    if ok is not None:
+        results.append({"id": "advanced-protection-url", "commit": "d0a5407281",
                         "ok": ok, "detail": detail, "red_gated": False,
                         "manual": False})
     ok, detail = helpers_carry_app_makers(helpers_dir_of(args.browser))
