@@ -8,6 +8,7 @@ symbol_level=1
 blink_symbol_level=0
 enable_iterator_debugging=false
 enable_updater=false
+enable_on_device_translation=false
 proprietary_codecs=true
 ffmpeg_branding="Chrome"
 enable_swiftshader=true

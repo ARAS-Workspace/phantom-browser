@@ -82,6 +82,7 @@ Each commit links to the change it is a witness for, in
 | `local-font-access` | [`2390c75581`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/2390c75581125ae22c3f9a13a8fcbe6c90810a46) | yes | `queryLocalFonts` and `FontData` are absent |
 | `netinfo-hints` | [`29df60052d`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/29df60052dcd7e4c3f1ea5957697c1d4cfc670a1) | — | the rtt, downlink and ect headers are fixed |
 | `netinfo-js` | [`29df60052d`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/29df60052dcd7e4c3f1ea5957697c1d4cfc670a1) | yes | `navigator.connection` is absent |
+| `on-device-translation` | [`f71c964552`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/f71c964552ccb5919f0aaa50c5d650acb2b5097e) | yes | no page finds a translator or a language detector interface |
 | `password-leak-endpoint` | [`e7a47a978d`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/e7a47a978d5cb75a89bf82938fb0c1fd0ab4f832) | — | the shipped binary carries no leak lookup path |
 | `privacy-guide-strings` | [`71962fc25d`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/71962fc25ddc52e961cea8c804537a23770dae82) [`1544ddc9b2`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/1544ddc9b2328f7643bca29e5e020c64b73fb509) | — | the privacy guide's own heading does not ship |
 | `pwa-install` | [`1e2bd73662`](https://github.com/ARAS-Workspace/phantom-browser-core/commit/1e2bd736622341bcca052281d091c1ef19dea9a6) | yes | the install prompt and the related apps query are absent |
