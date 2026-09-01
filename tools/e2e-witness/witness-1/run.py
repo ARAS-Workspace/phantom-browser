@@ -291,6 +291,7 @@ def locale_pak_has_speech_menu(pak):
 # check names the control that covers its own part of the string table.
 SHIPPED_SETTINGS_OPTION = b"Cached images and files"
 SHIPPED_READING_MODE_STRING = b"Read comfortably with minimal distractions"
+SHIPPED_LENS_STRING = b"Select anything on the page to search"
 
 
 def locale_pak_lacks_option(pak, option):
@@ -563,6 +564,11 @@ def run_pass(args, red):
             ("accessibility-section-strings", "b3819a8f26",
              [b"Copied to clipboard confirmations"],
              SHIPPED_SETTINGS_OPTION, "the settings list"),
+            ("lens-strings", "9eb58e519c",
+             [b"Homework help", b"Select region of screen to search",
+              b"Search any image with Google Lens", b"Search anything on page",
+              b"help me with this"],
+             SHIPPED_LENS_STRING, "the lens strings"),
     ):
         ok, detail = locale_pak_lacks_strings(pak, absent, control, control_name)
         if ok is not None:
