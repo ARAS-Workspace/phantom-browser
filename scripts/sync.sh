@@ -194,7 +194,7 @@ EOF
 stage_configure() {
     local started=$SECONDS
     local gn="$SRC/buildtools/mac/gn"
-    local arch out desired
+    local arch out desired previous
 
     [ -x "$gn" ] || die "no gn at $gn, the deps stage has not finished"
     [ -f "$FLAGS" ] || die "no build flags at $FLAGS"
@@ -211,11 +211,28 @@ stage_configure() {
             continue
         fi
 
+        # gn reads args.gn out of the output directory, so the new arguments
+        # have to be in place before it runs. Keep the ones it last generated
+        # from, so that a failed run leaves the directory describing the build
+        # it actually has rather than the one that was asked for.
+        previous="$out/.args.previous"
+        rm -f "$previous"
+        if [ -f "$out/args.gn" ]; then
+            cp "$out/args.gn" "$previous"
+        fi
         mv "$desired" "$out/args.gn"
         say "generating build files for $arch"
-        ( cd "$SRC" && env -u VPYTHON_BYPASS -u VIRTUAL_ENV -u PYTHONPATH -u PYTHONHOME \
+        if ! ( cd "$SRC" && env -u VPYTHON_BYPASS -u VIRTUAL_ENV -u PYTHONPATH -u PYTHONHOME \
             PATH="$TREE/.staging/depot_tools:$(path_without_virtualenv)" \
-            "$gn" gen "out/$arch" --fail-on-unused-args )
+            "$gn" gen "out/$arch" --fail-on-unused-args ); then
+            if [ -f "$previous" ]; then
+                mv "$previous" "$out/args.gn"
+                die "gn gen failed for $arch, the previous arguments are back in place"
+            fi
+            rm -f "$out/args.gn"
+            die "gn gen failed for $arch and there were no arguments to go back to"
+        fi
+        rm -f "$previous"
         [ -f "$out/build.ninja" ] || die "gn gen finished but there is no build.ninja in $out"
     done
 
