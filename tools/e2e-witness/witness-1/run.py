@@ -49,7 +49,7 @@ RED_FEATURES = [
     "WebSpeechRecognitionContext", "AppBanner", "InstalledApp",
     "NetworkInformationAPI", "CpuPerformance", "FontAccess", "Gamepad",
     "WebUSB", "WebHID", "WebBluetooth", "Serial", "BarcodeDetector",
-    "TranslationAPI", "LanguageDetectionAPI",
+    "TranslationAPI", "LanguageDetectionAPI", "Presentation", "RemotePlayback",
 ]
 
 
