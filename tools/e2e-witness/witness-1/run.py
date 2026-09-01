@@ -243,6 +243,20 @@ def framework_has_lens_upload_endpoints(framework):
                       if hits else "no lens upload address")
 
 
+def framework_has_closed_feature_hosts(framework):
+    """Addresses for work this browser no longer does are not compiled in."""
+    if not os.path.exists(framework):
+        return None, "framework not found at " + framework
+    with open(framework, "rb") as f:
+        blob = f.read()
+    if SHIPPED_GOOGLE_HOST not in blob:
+        return None, "the framework does not read like a chromium binary"
+    hits = [s for s in (b"content-autofill.googleapis.com",
+                        b"translate.googleapis.com") if s in blob]
+    return not hits, (", ".join(h.decode() for h in hits) + " still ships"
+                      if hits else "neither closed feature host ships")
+
+
 def framework_has_advanced_protection_url(framework):
     """The settings page no longer assembles the enrolment landing address."""
     if not os.path.exists(framework):
@@ -500,6 +514,11 @@ def run_pass(args, red):
     ok, detail = framework_has_lens_upload_endpoints(framework_of(args.browser))
     if ok is not None:
         results.append({"id": "lens-upload-endpoints", "commit": "6146b4d3e2",
+                        "ok": ok, "detail": detail, "red_gated": False,
+                        "manual": False})
+    ok, detail = framework_has_closed_feature_hosts(framework_of(args.browser))
+    if ok is not None:
+        results.append({"id": "closed-feature-hosts", "commit": "a019850d10",
                         "ok": ok, "detail": detail, "red_gated": False,
                         "manual": False})
     ok, detail = helpers_carry_app_makers(helpers_dir_of(args.browser))
