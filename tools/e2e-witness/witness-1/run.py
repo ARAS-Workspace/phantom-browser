@@ -312,6 +312,7 @@ def locale_pak_has_speech_menu(pak):
 SHIPPED_SETTINGS_OPTION = b"Cached images and files"
 SHIPPED_READING_MODE_STRING = b"Read comfortably with minimal distractions"
 SHIPPED_LENS_STRING = b"Select anything on the page to search"
+SHIPPED_CAST_STRING = b"Cast tab"
 
 
 def locale_pak_lacks_option(pak, option):
@@ -592,6 +593,10 @@ def run_pass(args, red):
             ("accessibility-section-strings", "b3819a8f26",
              [b"Copied to clipboard confirmations"],
              SHIPPED_SETTINGS_OPTION, "the settings list"),
+            ("cast-menu-strings", "be562726ad",
+             [b"Save, Share, and Cast", b"Display on another screen",
+              b"Optimize fullscreen videos"],
+             SHIPPED_CAST_STRING, "the cast strings"),
             ("lens-strings", "9eb58e519c",
              [b"Homework help", b"Select region of screen to search",
               b"Search any image with Google Lens", b"Search anything on page",
