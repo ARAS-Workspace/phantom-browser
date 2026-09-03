@@ -1,11 +1,11 @@
-// faa8d29943 — the one primitive that separates otherwise identical machines
+// 2baa2d809c — the one primitive that separates otherwise identical machines
 (() => {
   const TIMER_EXTENSIONS =
       ["EXT_disjoint_timer_query", "EXT_disjoint_timer_query_webgl2"];
 
   register({
     id: "webgl-timer-query",
-    commit: "faa8d29943",
+    commit: "2baa2d809c",
     run() {
       const found = [];
       for (const version of [1, 2]) {

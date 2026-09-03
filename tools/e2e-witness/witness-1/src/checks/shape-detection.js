@@ -1,11 +1,11 @@
-// 43573e45f5 — the shape detection api handed any image a page chose to the
+// 80ee3d253d — the shape detection api handed any image a page chose to the
 // system vision framework; none of its three detectors may exist
 (() => {
   const DETECTORS = ["BarcodeDetector", "FaceDetector", "TextDetector"];
 
   register({
     id: "shape-detection",
-    commit: "43573e45f5",
+    commit: "80ee3d253d",
     redGated: true,
     run() {
       const left = present(DETECTORS);

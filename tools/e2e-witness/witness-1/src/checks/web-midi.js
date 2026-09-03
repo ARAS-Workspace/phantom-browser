@@ -1,4 +1,4 @@
-// 96c02a5df6 — the last door onto attached hardware
+// 95dd27a3f2 — the last door onto attached hardware
 (() => {
   const MIDI_NAMES = [
     "navigator.requestMIDIAccess", "MIDIAccess", "MIDIInput", "MIDIOutput",
@@ -8,7 +8,7 @@
 
   register({
     id: "web-midi",
-    commit: "96c02a5df6",
+    commit: "95dd27a3f2",
     redGated: true,
     run() {
       const left = present(MIDI_NAMES);

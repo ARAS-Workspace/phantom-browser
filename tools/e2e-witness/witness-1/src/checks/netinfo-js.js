@@ -1,8 +1,8 @@
-// 29df60052d — the script half: navigator.connection is gone
+// 5ab19bca41 — the script half: navigator.connection is gone
 (() => {
   register({
     id: "netinfo-js",
-    commit: "29df60052d",
+    commit: "5ab19bca41",
     redGated: true,
     run() {
       return {ok: navigator.connection === undefined,

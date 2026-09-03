@@ -1,8 +1,8 @@
-// 66dd8125a5 — the interface objects follow the disabled list off the global
+// 2214ea3f1f — the interface objects follow the disabled list off the global
 (() => {
   register({
     id: "gamepad-interfaces",
-    commit: "66dd8125a5",
+    commit: "2214ea3f1f",
     redGated: true,
     run() {
       const left = present(["Gamepad", "GamepadButton", "GamepadEvent",

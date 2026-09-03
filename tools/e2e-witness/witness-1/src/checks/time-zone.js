@@ -1,11 +1,11 @@
-// ee66774f4f — the browser is launched in America/Los_Angeles, so agreeing with
+// 96508b24f5 — the browser is launched in America/Los_Angeles, so agreeing with
 // the host would be the failure here
 (() => {
   const EXPECTED_ZONE = "UTC";
 
   register({
     id: "time-zone",
-    commit: "ee66774f4f",
+    commit: "96508b24f5",
     run() {
       const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       return {

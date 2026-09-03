@@ -1,8 +1,8 @@
-// a2b457f072 — nothing that enumerates attached hardware
+// a107586c4d — nothing that enumerates attached hardware
 (() => {
   register({
     id: "device-apis",
-    commit: "a2b457f072",
+    commit: "a107586c4d",
     redGated: true,
     run() {
       const left = present(["navigator.usb", "navigator.hid", "navigator.bluetooth",

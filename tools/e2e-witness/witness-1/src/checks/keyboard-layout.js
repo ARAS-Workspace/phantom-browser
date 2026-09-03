@@ -1,11 +1,11 @@
-// 9ec6c28a0f — a fixed us layout, never the one the system has installed
+// 8b723848f1 — a fixed us layout, never the one the system has installed
 (() => {
   const EXPECTED_ENTRIES = 47;
   const SPOT_CHECKS = {KeyQ: "q", KeyA: "a", Digit1: "1", Slash: "/"};
 
   register({
     id: "keyboard-layout",
-    commit: "9ec6c28a0f",
+    commit: "8b723848f1",
     async run() {
       let map;
       try {

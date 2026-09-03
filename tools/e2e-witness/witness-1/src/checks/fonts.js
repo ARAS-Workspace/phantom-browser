@@ -1,4 +1,4 @@
-// b4f2300f1a — only typefaces shipped inside the system font directory resolve.
+// 84816e57a9 — only typefaces shipped inside the system font directory resolve.
 //
 // document.fonts.check() answers true for a family that does not exist at all,
 // so the only honest probe is the width comparison an attacker uses.
@@ -22,7 +22,7 @@
   // back to it whatever family is asked for, so both sides measure the same glyphs.
   register({
     id: "font-probe-control",
-    commit: "b4f2300f1a",
+    commit: "84816e57a9",
     async run() {
       await document.fonts.ready;
       return {
@@ -34,7 +34,7 @@
 
   register({
     id: "font-filter",
-    commit: "b4f2300f1a",
+    commit: "84816e57a9",
     async run() {
       await document.fonts.ready;
       const probeWorks =

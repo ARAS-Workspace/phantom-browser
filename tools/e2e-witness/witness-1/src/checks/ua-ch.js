@@ -1,4 +1,4 @@
-// 626ef1a669 — the client hints agree with the frozen user agent instead of
+// ed7e9bb3cd — the client hints agree with the frozen user agent instead of
 // contradicting it, which would be a worse fingerprint than the real value
 (() => {
   const EXPECTED = {platformVersion: "10.15.7", architecture: "x86"};
@@ -6,7 +6,7 @@
 
   register({
     id: "ua-ch",
-    commit: "626ef1a669",
+    commit: "ed7e9bb3cd",
     async run() {
       let hints;
       try {

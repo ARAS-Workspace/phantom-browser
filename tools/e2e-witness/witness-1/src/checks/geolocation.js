@@ -1,10 +1,10 @@
-// 99d4bb62b9 — every position resolves to the same fixed point
+// 6632c23578 — every position resolves to the same fixed point
 (() => {
   const FIXED = {latitude: 0, longitude: 0};
 
   register({
     id: "geolocation",
-    commit: "61759f56f6",
+    commit: "4865169771",
     // Chromium grants this only through a prompt or devtools, and neither the
     // seeded profile nor the policy pref reaches the decision, so the fixed
     // point is confirmed by hand and this row is reported, not counted.

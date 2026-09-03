@@ -1,8 +1,8 @@
-// 2390c75581 — no page may ask for the list of installed typefaces
+// 03d3f2d1b9 — no page may ask for the list of installed typefaces
 (() => {
   register({
     id: "local-font-access",
-    commit: "2390c75581",
+    commit: "03d3f2d1b9",
     redGated: true,
     run() {
       const left = present(["queryLocalFonts", "FontData"]);

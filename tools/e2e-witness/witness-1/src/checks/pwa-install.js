@@ -1,9 +1,9 @@
-// 1e2bd73662 — a page can neither be offered for installation nor ask which of
+// 8af0349b11 — a page can neither be offered for installation nor ask which of
 // its related applications are already installed
 (() => {
   register({
     id: "pwa-install",
-    commit: "1e2bd73662",
+    commit: "8af0349b11",
     redGated: true,
     run() {
       const left = present(["BeforeInstallPromptEvent",

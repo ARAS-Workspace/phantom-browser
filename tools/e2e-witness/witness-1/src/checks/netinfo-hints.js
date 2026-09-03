@@ -1,10 +1,10 @@
-// 29df60052d — the header half: a fixed fast connection, the same for every host
+// 5ab19bca41 — the header half: a fixed fast connection, the same for every host
 (() => {
   const EXPECTED_HINTS = {rtt: "50", downlink: "10", ect: "4g"};
 
   register({
     id: "netinfo-hints",
-    commit: "29df60052d",
+    commit: "5ab19bca41",
     async run() {
       let seen;
       try {

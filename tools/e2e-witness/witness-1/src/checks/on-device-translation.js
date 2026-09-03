@@ -1,4 +1,4 @@
-// f71c964552 — the translator and language detector interfaces gave a page a
+// 0f3396ffdd — the translator and language detector interfaces gave a page a
 // scripted path to a service that fetches a translation library and language
 // packs from the component updater; neither may exist
 (() => {
@@ -6,7 +6,7 @@
 
   register({
     id: "on-device-translation",
-    commit: "f71c964552",
+    commit: "0f3396ffdd",
     redGated: true,
     run() {
       const left = present(INTERFACES);

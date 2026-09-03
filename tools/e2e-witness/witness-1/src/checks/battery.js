@@ -1,8 +1,8 @@
-// 5c2ec8efe2 — the battery status api must not be reachable
+// e1a38e77ff — the battery status api must not be reachable
 (() => {
   register({
     id: "battery",
-    commit: "5c2ec8efe2",
+    commit: "e1a38e77ff",
     redGated: true,
     run() {
       const left = present(["navigator.getBattery", "BatteryManager"]);

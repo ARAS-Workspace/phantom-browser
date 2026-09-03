@@ -1,11 +1,11 @@
-// 513405f6da — the debug renderer info extension stays, but it answers two
+// 4ab3477531 — the debug renderer info extension stays, but it answers two
 // fixed safari strings instead of the metal device name
 (() => {
   const EXPECTED = {renderer: "Apple GPU", vendor: "Apple Inc."};
 
   register({
     id: "webgl-renderer",
-    commit: "513405f6da",
+    commit: "4ab3477531",
     run() {
       const ctx = gl(1);
       if (!ctx) {

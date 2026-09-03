@@ -1,4 +1,4 @@
-// 4699da641c — nothing a page can ask about presenting to a screen, or about
+// 80d227f78c — nothing a page can ask about presenting to a screen, or about
 // playing back on one, is defined any more.
 (() => {
   const GLOBALS = [
@@ -13,7 +13,7 @@
 
   register({
     id: "cast-interfaces",
-    commit: "4699da641c",
+    commit: "80d227f78c",
     redGated: true,
     run() {
       const left = present(GLOBALS);

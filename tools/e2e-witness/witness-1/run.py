@@ -184,7 +184,7 @@ def seed_profile(directory, origin):
 
 
 def framework_has_speech_symbols(framework):
-    """e440b9758f — the mock must not reach AVFoundation speech at all."""
+    """b1aaa69ca4 — the mock must not reach AVFoundation speech at all."""
     if not os.path.exists(framework):
         return None, "framework not found at " + framework
     out = subprocess.run(["nm", "-u", framework], capture_output=True, text=True)
@@ -518,86 +518,86 @@ def run_pass(args, red):
     # The artifact witnesses need no browser.
     ok, detail = framework_has_speech_symbols(framework_of(args.browser))
     if ok is not None:
-        results.append({"id": "speech-symbols", "commit": "e440b9758f",
+        results.append({"id": "speech-symbols", "commit": "b1aaa69ca4",
                         "ok": ok, "detail": detail, "red_gated": False,
                         "manual": False})
     ok, detail = locale_pak_has_speech_menu(locale_pak_of(args.browser))
     if ok is not None:
-        results.append({"id": "speech-menu-strings", "commit": "bd18790f21",
+        results.append({"id": "speech-menu-strings", "commit": "64fc5ac1f4",
                         "ok": ok, "detail": detail, "red_gated": False,
                         "manual": False})
     ok, detail = framework_has_leak_endpoint(framework_of(args.browser))
     if ok is not None:
-        results.append({"id": "password-leak-endpoint", "commit": "e7a47a978d",
+        results.append({"id": "password-leak-endpoint", "commit": "529ce0f188",
                         "ok": ok, "detail": detail, "red_gated": False,
                         "manual": False})
     ok, detail = framework_has_advanced_protection_url(
         framework_of(args.browser))
     if ok is not None:
-        results.append({"id": "advanced-protection-url", "commit": "d0a5407281",
+        results.append({"id": "advanced-protection-url", "commit": "23b5a8fb60",
                         "ok": ok, "detail": detail, "red_gated": False,
                         "manual": False})
     ok, detail = framework_has_lens_upload_endpoints(framework_of(args.browser))
     if ok is not None:
-        results.append({"id": "lens-upload-endpoints", "commit": "6146b4d3e2",
+        results.append({"id": "lens-upload-endpoints", "commit": "d1b7de5f88",
                         "ok": ok, "detail": detail, "red_gated": False,
                         "manual": False})
     ok, detail = framework_has_cast_help_urls(framework_of(args.browser))
     if ok is not None:
-        results.append({"id": "cast-help-urls", "commit": "d6913afb61",
+        results.append({"id": "cast-help-urls", "commit": "8026b45fe6",
                         "ok": ok, "detail": detail, "red_gated": False,
                         "manual": False})
     ok, detail = framework_has_closed_feature_hosts(framework_of(args.browser))
     if ok is not None:
-        results.append({"id": "closed-feature-hosts", "commit": "a019850d10",
+        results.append({"id": "closed-feature-hosts", "commit": "78daf38ef5",
                         "ok": ok, "detail": detail, "red_gated": False,
                         "manual": False})
     ok, detail = helpers_carry_app_makers(helpers_dir_of(args.browser))
     if ok is not None:
-        results.append({"id": "app-helper-binaries", "commit": "9c4f833a09",
+        results.append({"id": "app-helper-binaries", "commit": "8588b00beb",
                         "ok": ok, "detail": detail, "red_gated": False,
                         "manual": False})
     pak = locale_pak_of(args.browser)
     ok, detail = locale_pak_lacks_option(pak, b"Autofill form data")
     if ok is not None:
-        results.append({"id": "form-data-option", "commit": "8cd33b5365",
+        results.append({"id": "form-data-option", "commit": "05f3157447",
                         "ok": ok, "detail": detail, "red_gated": False,
                         "manual": False})
     ok, detail = locale_pak_lacks_option(pak, b"Hosted app data")
     if ok is not None:
-        results.append({"id": "hosted-app-data-option", "commit": "8cd33b5365",
+        results.append({"id": "hosted-app-data-option", "commit": "05f3157447",
                         "ok": ok, "detail": detail, "red_gated": False,
                         "manual": False})
     for check_id, commit, absent, control, control_name in (
-            ("security-keys-strings", "f8521c87ab",
+            ("security-keys-strings", "8469a3ded6",
              [b"Manage security keys"],
              SHIPPED_SETTINGS_OPTION, "the settings list"),
-            ("privacy-guide-strings", "71962fc25d",
+            ("privacy-guide-strings", "b7a7acdd30",
              [b"A guide of your privacy choices"],
              SHIPPED_SETTINGS_OPTION, "the settings list"),
-            ("translate-settings-strings", "249059a2c7",
+            ("translate-settings-strings", "26729e9293",
              [b"Use Google Translate"],
              SHIPPED_SETTINGS_OPTION, "the settings list"),
-            ("leak-detection-strings", "e46c63ac1b",
+            ("leak-detection-strings", "26d4e36397",
              [b"Compromised password detection"],
              SHIPPED_SETTINGS_OPTION, "the settings list"),
-            ("reading-mode-strings", "8f95aed635",
+            ("reading-mode-strings", "3568ed66ee",
              [b"Open in Reading Mode", b"Listen to This Page"],
              SHIPPED_READING_MODE_STRING, "the reading mode strings"),
-            ("reading-mode-tooltip", "ef070a9991",
+            ("reading-mode-tooltip", "35a7b4da2b",
              [b"Reading mode ("],
              SHIPPED_READING_MODE_STRING, "the reading mode strings"),
-            ("safety-hub-password-card-strings", "ac37598e50",
+            ("safety-hub-password-card-strings", "d4e07d82d5",
              [b"No weak or reused passwords"],
              SHIPPED_SETTINGS_OPTION, "the settings list"),
-            ("accessibility-section-strings", "b3819a8f26",
+            ("accessibility-section-strings", "34723903c5",
              [b"Copied to clipboard confirmations"],
              SHIPPED_SETTINGS_OPTION, "the settings list"),
-            ("cast-menu-strings", "be562726ad",
+            ("cast-menu-strings", "6edc95d579",
              [b"Save, Share, and Cast", b"Display on another screen",
               b"Optimize fullscreen videos"],
              SHIPPED_CAST_STRING, "the cast strings"),
-            ("lens-strings", "9eb58e519c",
+            ("lens-strings", "6834d8e209",
              [b"Homework help", b"Select region of screen to search",
               b"Search any image with Google Lens", b"Search anything on page",
               b"help me with this"],

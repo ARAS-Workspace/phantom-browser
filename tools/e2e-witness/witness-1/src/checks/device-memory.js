@@ -1,8 +1,8 @@
-// 3c38f49f33 — the memory tier is not exposed and the core count is fixed
+// 0b6c6c7148 — the memory tier is not exposed and the core count is fixed
 (() => {
   register({
     id: "device-memory",
-    commit: "3c38f49f33",
+    commit: "0b6c6c7148",
     run() {
       return {
         ok: navigator.deviceMemory === undefined &&

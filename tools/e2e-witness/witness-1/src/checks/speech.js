@@ -1,4 +1,4 @@
-// ae2ee271d5 — neither the synthesis side nor the recognition side exists
+// a63739af7d — neither the synthesis side nor the recognition side exists
 (() => {
   const SPEECH_NAMES = [
     "speechSynthesis", "SpeechSynthesis", "SpeechSynthesisUtterance",
@@ -11,7 +11,7 @@
 
   register({
     id: "speech",
-    commit: "ae2ee271d5",
+    commit: "a63739af7d",
     redGated: true,
     run() {
       const left = present(SPEECH_NAMES);

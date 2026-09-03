@@ -3,7 +3,7 @@
 (() => {
   register({
     id: "worker-surfaces",
-    commit: "faa8d29943+a2b457f072+3c38f49f33+29df60052d",
+    commit: "2baa2d809c+a107586c4d+0b6c6c7148+5ab19bca41",
     redGated: true,
     async run() {
       let answer;
