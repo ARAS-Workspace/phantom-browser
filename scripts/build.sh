@@ -86,10 +86,10 @@ if [ "$targets" != "$DEFAULT_TARGET" ]; then
     exit 0
 fi
 
-app="$out/Chromium.app"
+app="$out/Phantom Browser.app"
 [ -d "$app" ] || die "ninja finished but there is no app at $app"
 
-binary="$app/Contents/MacOS/Chromium"
+binary="$app/Contents/MacOS/Phantom Browser"
 [ -x "$binary" ] || die "the app has no executable at $binary"
 version="$("$binary" --version 2>&1 | head -1)"
 [ -n "$version" ] || die "the built binary did not answer --version"

@@ -18,23 +18,23 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, os.pardir, os.pardir, os.pardir))
 DEFAULT_BROWSER = os.path.join(
     ROOT, "chromium", "src", "out", "arm64",
-    "Chromium.app", "Contents", "MacOS", "Chromium")
+    "Phantom Browser.app", "Contents", "MacOS", "Phantom Browser")
 
 
 def framework_of(browser):
     """The framework that belongs to the given binary, not to a fixed build."""
     app = os.path.dirname(os.path.dirname(os.path.dirname(browser)))
     return os.path.join(app, "Contents", "Frameworks",
-                        "Chromium Framework.framework", "Versions", "Current",
-                        "Chromium Framework")
+                        "Phantom Browser Framework.framework", "Versions",
+                        "Current", "Phantom Browser Framework")
 
 
 def locale_pak_of(browser):
     """The english strings that ship with the given binary."""
     app = os.path.dirname(os.path.dirname(os.path.dirname(browser)))
     return os.path.join(app, "Contents", "Frameworks",
-                        "Chromium Framework.framework", "Versions", "Current",
-                        "Resources", "en.lproj", "locale.pak")
+                        "Phantom Browser Framework.framework", "Versions",
+                        "Current", "Resources", "en.lproj", "locale.pak")
 
 
 # The browser is started in a zone that is not ours, so that the time zone
@@ -199,8 +199,8 @@ def helpers_dir_of(browser):
     """The executables that ship beside the framework's own helpers."""
     app = os.path.dirname(os.path.dirname(os.path.dirname(browser)))
     return os.path.join(app, "Contents", "Frameworks",
-                        "Chromium Framework.framework", "Versions", "Current",
-                        "Helpers")
+                        "Phantom Browser Framework.framework", "Versions",
+                        "Current", "Helpers")
 
 
 def helpers_carry_app_makers(helpers):
