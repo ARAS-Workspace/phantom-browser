@@ -329,6 +329,20 @@ def framework_has_closed_feature_hosts(framework):
                       if hits else "no autofill server, no translate script")
 
 
+def framework_has_dictionary_download_host(framework):
+    """The address spell check dictionaries were fetched from is not compiled
+    in."""
+    if not os.path.exists(framework):
+        return None, "framework not found at " + framework
+    with open(framework, "rb") as f:
+        blob = f.read()
+    if SHIPPED_GOOGLE_HOST not in blob:
+        return None, "the framework does not read like a chromium binary"
+    hit = b"redirector.gvt1.com/edgedl/chrome/dict" in blob
+    return not hit, ("the dictionary download address still ships" if hit
+                     else "no dictionary download address")
+
+
 def framework_has_advanced_protection_url(framework):
     """The settings page no longer assembles the enrolment landing address."""
     if not os.path.exists(framework):
@@ -609,6 +623,12 @@ def run_pass(args, red):
         results.append({"id": "closed-feature-hosts", "commit": "78daf38ef5",
                         "ok": ok, "detail": detail, "red_gated": False,
                         "manual": False})
+    ok, detail = framework_has_dictionary_download_host(
+        framework_of(args.browser))
+    if ok is not None:
+        results.append({"id": "spell-check-dictionary-host",
+                        "commit": "bd3dd1d492", "ok": ok, "detail": detail,
+                        "red_gated": False, "manual": False})
     ok, detail = helpers_carry_app_makers(helpers_dir_of(args.browser))
     if ok is not None:
         results.append({"id": "app-helper-binaries", "commit": "8588b00beb",
@@ -637,6 +657,10 @@ def run_pass(args, red):
              SHIPPED_SETTINGS_OPTION, "the settings list"),
             ("leak-detection-strings", "26d4e36397",
              [b"Compromised password detection"],
+             SHIPPED_SETTINGS_OPTION, "the settings list"),
+            ("spell-check-strings", "6acb44a7d5",
+             [b"Check for spelling errors when you type text on web pages",
+              b"Spelling and Grammar"],
              SHIPPED_SETTINGS_OPTION, "the settings list"),
             ("reading-mode-strings", "3568ed66ee",
              [b"Open in Reading Mode", b"Listen to This Page"],
