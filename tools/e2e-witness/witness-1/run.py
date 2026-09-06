@@ -52,6 +52,10 @@ RED_FEATURES = [
     "TranslationAPI", "LanguageDetectionAPI", "Presentation", "RemotePlayback",
 ]
 
+# base::Features this browser turns on by default. --red turns them back off,
+# so a check marked red_gated for one of them must fail in that run too.
+RED_DISABLE_FEATURES = ["EnablePortBoundCookies"]
+
 
 SRC = os.path.join(HERE, "src")
 CHECKS = os.path.join(SRC, "checks")
@@ -76,13 +80,14 @@ def check_files():
 BROKEN_CHECK = "__broken.js"
 
 
-def render_page(self_test=False):
+def render_page(self_test=False, second_origin=""):
     names = check_files()
     if self_test:
         names = names + [BROKEN_CHECK]
     tags = "\n".join('<script src="/checks/%s"></script>' % name
                       for name in names)
-    files = "<script>window.CHECK_FILES = %s;</script>" % json.dumps(names)
+    files = ("<script>window.CHECK_FILES = %s; window.SECOND_ORIGIN = %s;"
+             "</script>" % (json.dumps(names), json.dumps(second_origin)))
     return (read_asset("page.html")
             .replace("<!--FILES-->", files)
             .replace("<!--CHECKS-->", tags))
@@ -91,10 +96,43 @@ def render_page(self_test=False):
 class WitnessServer(http.server.ThreadingHTTPServer):
     """A server that carries the queue the page posts its results into."""
 
-    def __init__(self, address, handler_class, self_test=False):
+    def __init__(self, address, handler_class, self_test=False,
+                 second_origin=""):
         super().__init__(address, handler_class)
         self.results = queue.Queue()
         self.self_test = self_test
+        self.second_origin = second_origin
+
+
+class CookieServer(http.server.ThreadingHTTPServer):
+    """A second origin on another port, for the cookie binding check."""
+
+    def __init__(self, address, handler_class, main_origin):
+        super().__init__(address, handler_class)
+        self.main_origin = main_origin
+
+
+# noinspection PyPep8Naming
+class CookieHandler(http.server.BaseHTTPRequestHandler):
+
+    def log_message(self, *args):
+        pass
+
+    def do_GET(self):
+        if self.path.split("?")[0] != "/echo":
+            self.send_error(404)
+            return
+        # Report the Cookie header the page's origin managed to attach when it
+        # fetched this other port with credentials.
+        raw = json.dumps({"cookie": self.headers.get("Cookie")}).encode()
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(raw)))
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("Access-Control-Allow-Origin", self.server.main_origin)
+        self.send_header("Access-Control-Allow-Credentials", "true")
+        self.end_headers()
+        self.wfile.write(raw)
 
 
 # do_GET and do_POST are named by BaseHTTPRequestHandler, not by us.
@@ -120,7 +158,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         path = self.path.split("?")[0]
         if path == "/":
-            self._send(render_page(self.server.self_test),
+            self._send(render_page(self.server.self_test,
+                                   self.server.second_origin),
                        "text/html; charset=utf-8")
         elif path == "/checks/" + BROKEN_CHECK and self.server.self_test:
             # Deliberately unparseable, to prove the integrity gate can fail.
@@ -130,6 +169,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self._send(read_asset(name), ctype)
         elif path.startswith("/checks/") and path[8:] in check_files():
             self._send(read_asset(os.path.join("checks", path[8:])), JS)
+        elif path == "/gpc":
+            seen = {k.lower(): v for k, v in self.headers.items()}
+            self._send(json.dumps({"sec-gpc": seen.get("sec-gpc")}),
+                       "application/json")
         elif path == "/hints":
             seen = {k.lower(): v for k, v in self.headers.items()}
             self._send(json.dumps({
@@ -353,7 +396,7 @@ def verdict(result, red):
     if result.get("manual"):
         # Confirmed by hand; the harness cannot drive it, so it is reported
         # without being counted either way.
-        return ("MANUAL", False)
+        return "MANUAL", False
     if not red:
         return ("PASS", False) if result["ok"] else ("FAIL", True)
     if not result["red_gated"]:
@@ -389,7 +432,8 @@ def browser_argv(args, profile, origin, red):
             "--no-first-run",
             "--no-default-browser-check",
             "--disable-search-engine-choice-screen",
-            "--disable-features=DialMediaRouteProvider",
+            "--disable-features=" + ",".join(
+                ["DialMediaRouteProvider"] + (RED_DISABLE_FEATURES if red else [])),
             *(["--enable-logging=stderr", "--v=0",
                "--vmodule=permission*=2,geolocation*=2,*content_setting*=2"]
               if args.browser_log else []),
@@ -502,8 +546,14 @@ def run_pass(args, red):
     """One browser launch, from serving the page to what it reported back."""
     port = free_port()
     origin = "http://127.0.0.1:%d" % port
-    server = WitnessServer(("127.0.0.1", port), Handler, args.self_test)
+    second_port = free_port()
+    second_origin = "http://127.0.0.1:%d" % second_port
+    server = WitnessServer(("127.0.0.1", port), Handler, args.self_test,
+                           second_origin)
     threading.Thread(target=server.serve_forever, daemon=True).start()
+    cookie_server = CookieServer(("127.0.0.1", second_port), CookieHandler,
+                                 origin)
+    threading.Thread(target=cookie_server.serve_forever, daemon=True).start()
 
     profile = tempfile.mkdtemp(prefix="phantom-witness-")
     seed_profile(profile, origin)
@@ -512,6 +562,7 @@ def run_pass(args, red):
           % ("RED" if red else "GREEN",
              " (headless)" if args.headless else "", HOST_TZ))
     results = collect(args, origin, profile, server, red)
+    cookie_server.shutdown()
     if results is None:
         sys.exit("witness: the page never reported back within %ds" % args.timeout)
 
