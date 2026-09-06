@@ -683,6 +683,11 @@ def run_pass(args, red):
               b"Search any image with Google Lens", b"Search anything on page",
               b"help me with this"],
              SHIPPED_LENS_STRING, "the lens strings"),
+            ("management-strings", "ee28571adc",
+             [b"Try Chrome Enterprise Core",
+              b"Learn about how your browser is managed",
+              b"Chrome Enterprise Connectors"],
+             SHIPPED_SETTINGS_OPTION, "the settings list"),
     ):
         ok, detail = locale_pak_lacks_strings(pak, absent, control, control_name)
         if ok is not None:
