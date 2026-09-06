@@ -56,6 +56,11 @@ RED_FEATURES = [
 # so a check marked red_gated for one of them must fail in that run too.
 RED_DISABLE_FEATURES = ["EnablePortBoundCookies"]
 
+# base::Features this build turns off by default; --red turns them back on
+# through --enable-features so those checks can go red.
+RED_ENABLE_FEATURES = ["BrowsingTopics", "ConversionMeasurement",
+                       "AdInterestGroupAPI", "Fledge"]
+
 
 SRC = os.path.join(HERE, "src")
 CHECKS = os.path.join(SRC, "checks")
@@ -442,6 +447,7 @@ def browser_argv(args, profile, origin, red):
         argv.append("--headless=new")
     if red:
         argv.append("--enable-blink-features=" + ",".join(RED_FEATURES))
+        argv.append("--enable-features=" + ",".join(RED_ENABLE_FEATURES))
     argv.append(origin + "/")
     return argv
 
