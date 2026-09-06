@@ -688,6 +688,11 @@ def run_pass(args, red):
               b"Learn about how your browser is managed",
               b"Chrome Enterprise Connectors"],
              SHIPPED_SETTINGS_OPTION, "the settings list"),
+            ("ai-mode-promo-strings", "290ef7ff5f",
+             [b"Ask questions while you browse",
+              b"You can keep chatting with AI Mode",
+              b"Search with files from Drive"],
+             SHIPPED_SETTINGS_OPTION, "the settings list"),
     ):
         ok, detail = locale_pak_lacks_strings(pak, absent, control, control_name)
         if ok is not None:
