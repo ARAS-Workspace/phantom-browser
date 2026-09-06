@@ -1,9 +1,9 @@
-// 77d44480e5 — Global Privacy Control is on for everyone: the navigator flag is
+// 796c7da1a5 — Global Privacy Control is on for everyone: the navigator flag is
 // true and every request carries Sec-GPC: 1
 (() => {
   register({
     id: "global-privacy-control",
-    commit: "77d44480e5",
+    commit: "796c7da1a5",
     async run() {
       const flag = navigator.globalPrivacyControl;
       let seen;

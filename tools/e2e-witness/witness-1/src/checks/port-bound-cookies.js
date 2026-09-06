@@ -1,9 +1,9 @@
-// 77d44480e5 — a cookie set on this origin's port is not sent to the same host on
+// 796c7da1a5 — a cookie set on this origin's port is not sent to the same host on
 // another port; --red turns EnablePortBoundCookies back off
 (() => {
   register({
     id: "port-bound-cookies",
-    commit: "77d44480e5",
+    commit: "796c7da1a5",
     redGated: true,
     async run() {
       const other = self.SECOND_ORIGIN;

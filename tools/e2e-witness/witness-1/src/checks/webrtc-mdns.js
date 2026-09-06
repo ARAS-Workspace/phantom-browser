@@ -1,11 +1,11 @@
-// 77d44480e5 — every WebRTC host candidate names a .local mDNS name, never a
+// 796c7da1a5 — every WebRTC host candidate names a .local mDNS name, never a
 // local IP address
 (() => {
   const PRIVATE_V4 = /\b(10|127|172\.(1[6-9]|2\d|3[01])|192\.168)\.\d+\.\d+\b/;
 
   register({
     id: "webrtc-mdns",
-    commit: "77d44480e5",
+    commit: "796c7da1a5",
     async run() {
       const pc = new RTCPeerConnection({iceServers: []});
       const hosts = [];
