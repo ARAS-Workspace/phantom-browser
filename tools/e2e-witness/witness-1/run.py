@@ -698,6 +698,10 @@ def run_pass(args, red):
               b"Experiments button removed from toolbar",
               b"Select experiment state for"],
              SHIPPED_SETTINGS_OPTION, "the settings list"),
+            ("help-center-strings", "90bb72f7a8",
+             [b"H&elp Center", b"About HID devices", b"About USB devices",
+              b"Beta Forum"],
+             SHIPPED_SETTINGS_OPTION, "the settings list"),
     ):
         ok, detail = locale_pak_lacks_strings(pak, absent, control, control_name)
         if ok is not None:
