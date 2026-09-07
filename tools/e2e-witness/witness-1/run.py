@@ -693,6 +693,11 @@ def run_pass(args, red):
               b"You can keep chatting with AI Mode",
               b"Search with files from Drive"],
              SHIPPED_SETTINGS_OPTION, "the settings list"),
+            ("chrome-labs-strings", "0bf3bbca32",
+             [b"Enable featured experiments",
+              b"Experiments button removed from toolbar",
+              b"Select experiment state for"],
+             SHIPPED_SETTINGS_OPTION, "the settings list"),
     ):
         ok, detail = locale_pak_lacks_strings(pak, absent, control, control_name)
         if ok is not None:
