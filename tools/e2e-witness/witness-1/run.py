@@ -12,6 +12,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+import urllib.parse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 # …/tools/e2e-witness/witness-1 -> the phantom-browser checkout
@@ -85,14 +86,16 @@ def check_files():
 BROKEN_CHECK = "__broken.js"
 
 
-def render_page(self_test=False, second_origin=""):
+def render_page(self_test=False, second_origin="", third_party_origin=""):
     names = check_files()
     if self_test:
         names = names + [BROKEN_CHECK]
     tags = "\n".join('<script src="/checks/%s"></script>' % name
                       for name in names)
     files = ("<script>window.CHECK_FILES = %s; window.SECOND_ORIGIN = %s;"
-             "</script>" % (json.dumps(names), json.dumps(second_origin)))
+             "window.THIRD_PARTY_ORIGIN = %s;</script>"
+             % (json.dumps(names), json.dumps(second_origin),
+                json.dumps(third_party_origin)))
     return (read_asset("page.html")
             .replace("<!--FILES-->", files)
             .replace("<!--CHECKS-->", tags))
@@ -102,11 +105,12 @@ class WitnessServer(http.server.ThreadingHTTPServer):
     """A server that carries the queue the page posts its results into."""
 
     def __init__(self, address, handler_class, self_test=False,
-                 second_origin=""):
+                 second_origin="", third_party_origin=""):
         super().__init__(address, handler_class)
         self.results = queue.Queue()
         self.self_test = self_test
         self.second_origin = second_origin
+        self.third_party_origin = third_party_origin
 
 
 class CookieServer(http.server.ThreadingHTTPServer):
@@ -124,16 +128,29 @@ class CookieHandler(http.server.BaseHTTPRequestHandler):
         pass
 
     def do_GET(self):
-        if self.path.split("?")[0] != "/echo":
+        path = self.path.split("?")[0]
+        if path not in ("/echo", "/set"):
             self.send_error(404)
             return
-        # Report the Cookie header the page's origin managed to attach when it
-        # fetched this other port with credentials.
-        raw = json.dumps({"cookie": self.headers.get("Cookie")}).encode()
+        if path == "/set":
+            # Hand back a cookie for this origin. Reached first-party over
+            # 127.0.0.1 and third-party over localhost, so whether it sticks is
+            # the third-party cookie setting speaking.
+            name = urllib.parse.parse_qs(
+                urllib.parse.urlparse(self.path).query).get("name", ["x"])[0]
+            raw = b"{}"
+        else:
+            # Report the Cookie header the page's origin managed to attach when
+            # it fetched this other port with credentials.
+            raw = json.dumps({"cookie": self.headers.get("Cookie")}).encode()
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(raw)))
         self.send_header("Cache-Control", "no-store")
+        if path == "/set":
+            self.send_header(
+                "Set-Cookie",
+                "%s=1; Path=/; Max-Age=120; SameSite=None; Secure" % name)
         self.send_header("Access-Control-Allow-Origin", self.server.main_origin)
         self.send_header("Access-Control-Allow-Credentials", "true")
         self.end_headers()
@@ -164,7 +181,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
         path = self.path.split("?")[0]
         if path == "/":
             self._send(render_page(self.server.self_test,
-                                   self.server.second_origin),
+                                   self.server.second_origin,
+                                   self.server.third_party_origin),
                        "text/html; charset=utf-8")
         elif path == "/checks/" + BROKEN_CHECK and self.server.self_test:
             # Deliberately unparseable, to prove the integrity gate can fail.
@@ -568,8 +586,11 @@ def run_pass(args, red):
     origin = "http://127.0.0.1:%d" % port
     second_port = free_port()
     second_origin = "http://127.0.0.1:%d" % second_port
+    # Same server, different site: 127.0.0.1 and localhost are not the same
+    # registrable domain, so a fetch to this one is third-party.
+    third_party_origin = "http://localhost:%d" % second_port
     server = WitnessServer(("127.0.0.1", port), Handler, args.self_test,
-                           second_origin)
+                           second_origin, third_party_origin)
     threading.Thread(target=server.serve_forever, daemon=True).start()
     cookie_server = CookieServer(("127.0.0.1", second_port), CookieHandler,
                                  origin)
